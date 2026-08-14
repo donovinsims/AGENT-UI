@@ -187,3 +187,20 @@
     transform: none;
   }
 }
+@keyframes sheetIn {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+.animate-overlay {
+  animation: overlayIn 0.12s ease-out both;
+}
+.animate-menu {
+  animation: menuIn 0.13s var(--ease-quad) both;
+}
+.animate-sheet {
+  animation: sheetIn 0.2s var(--ease-quad) both;
+}
