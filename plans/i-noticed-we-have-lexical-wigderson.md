@@ -17,7 +17,7 @@ Lead → Research → Contact → Outreach → Qualification → Opportunity
 
 The owner can perform every operation manually from desktop or mobile. Agents, CLI, and integrations call the same validated backend operations — they never click the UI or hold database credentials.
 
-**Full product contract:** `src/imports/pasted_text/operator-os-guide.md` (identical to `operator-os-prd.md`). Everything below is derived from or consistent with that document.
+**Full product contract:** `src/imports/pasted_text/operator-os-guide.md` (identical to `operator-os-prd.md`) is referenced by prior handoff material, but neither file is present in the checked-in `src/imports` tree as of 2026-08-14. Do not treat its content as locally verifiable until it is restored or supplied. The current implementation facts below are verified from the source modules named in the File Map.
 
 ### Non-negotiable product principles
 
@@ -327,12 +327,16 @@ index.html                 — Vite HTML shell; will need no-FOUC theme script
 
 | File | Purpose |
 |---|---|
-| `src/imports/pasted_text/operator-os-guide.md` | Full product contract — IA, entities, lifecycle, screens, agents, data model, phases |
-| `src/imports/pasted_text/operator-os-prd.md` | Duplicate of the above (same content) |
-| `src/imports/linear-app-DESIGN-3.md` | Binding visual spec — tokens, typography, component sizes, do/don't rules, agent prompt snippet |
+| `src/imports/linear-app-DESIGN-3.md` | **Binding** visual spec — tokens, typography, component sizes, do/don't rules |
 | `src/imports/DESIGN.md` | Additional Linear design analysis — color roles, typography details, border system |
+| `plans/ui-screen-inventory.md` | Verified route, shell, screen, interaction-state, and shared-primitive inventory |
+| `plans/domain-model-and-seed-data.md` | Verified in-memory entity, relationship, state-vocabulary, and migration contract |
+| `plans/backend-integration-contract.md` | Deferred backend/API/CLI/agent safety and integration contract |
+| `plans/design-acceptance-checklist.md` | Binding design quality gate for all future UI work, including light-theme parity |
 | `plans/background-i-m-building-compiled-parrot.md` | Previous build plan — records the dual-theme decision and light palette values |
 | `plans/product-type-internal-agent-native-dapper-tarjan.md` | Earlier build plan — detailed phase breakdown and architecture decisions |
+| `src/imports/pasted_text/operator-os-guide.md` | Referenced full product contract, **currently missing from the checked-in import tree** |
+| `src/imports/pasted_text/operator-os-prd.md` | Referenced duplicate contract, **currently missing from the checked-in import tree** |
 
 ---
 
