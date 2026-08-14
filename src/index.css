@@ -1,1 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import 'tailwindcss';
+
+/* ============================================================
+   Operator OS — Linear-derived dark token contract
+   Semantic tokens only; components must not introduce one-off
+   color / radius / shadow / motion values.
+   ============================================================ */
+@theme {
+  --font-sans: 'Inter', 'SF Pro Display', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* Canvas & elevation ladder */
+  --color-canvas: #08090a;
+  --color-level-1: #0f1011;
+  --color-level-2: #141516;
+  --color-level-3: #191a1b;
+  --color-surface: #1c1c1f;
+  --color-surface-raised: #232326;
+  --color-surface-active: #28282c;
+  --color-scrim: #000000d9;
+
+  /* Borders */
+  --color-border: #23252a;
+  --color-border-strong: #34343a;
+  --color-border-input: #3e3e44;
+  --color-hairline: #ffffff0d;
+  --color-line: #37393a;
+
+  /* Text */
+  --color-text-primary: #f7f8f8;
+  --color-text-secondary: #d0d6e0;
+  --color-text-tertiary: #8a8f98;
+  --color-text-muted: #62666d;
+
+  /* Chrome accent */
+  --color-brand: #5e6ad2;
+  --color-brand-hover: #6872d8;
+  --color-accent: #7170ff;
+  --color-ring: rgba(94, 106, 210, 0.25);
+
+  /* Status semantics (issue states / priority only) */
+  --color-status-blue: #3caefe;
+  --color-status-green: #27a644;
+  --color-status-red: #eb5757;
+  --color-status-orange: #fc7840;
+  --color-status-yellow: #f0bf00;
+  --color-status-teal: #00b8cc;
+
+  /* Radii */
+  --radius-row: 6px;
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-panel: 16px;
+
+  /* Motion */
+  --ease-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    margin: 0;
+    background-color: var(--color-canvas);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'cv01', 'ss03';
+  }
+  * {
+    border-color: var(--color-border);
+  }
+  ::selection {
+    background: var(--color-ring);
+    color: var(--color-text-primary);
+  }
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 1px var(--color-brand), 0 0 0 4px var(--color-ring);
+    border-radius: var(--radius-control);
+  }
+}
+
+@layer utilities {
+  /* Linear signature optical weights — never true 500/600/700 */
+  .w-medium {
+    font-weight: 510;
+  }
+  .w-semibold {
+    font-weight: 590;
+  }
+  .w-bold {
+    font-weight: 680;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kbd {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1;
+    color: var(--color-text-tertiary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 3px 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+  }
+
+  .shadow-stack {
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.2),
+      0 5px 2px #00000003,
+      0 3px 2px #0000000a,
+      0 1px 1px #00000012,
+      0 4px 32px rgba(8, 9, 10, 0.6);
+  }
+
+  /* Scrollbars: hidden until scroll (Linear-quiet) */
+  .scroll-quiet {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .scroll-quiet::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scroll-quiet::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  .scroll-quiet:hover::-webkit-scrollbar-thumb,
+  .scroll-quiet:focus-within::-webkit-scrollbar-thumb {
+    background: var(--color-surface-raised);
+    background-clip: padding-box;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@keyframes staggerIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-in {
+  animation: staggerIn 0.16s var(--ease-quad) both;
+}
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes menuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

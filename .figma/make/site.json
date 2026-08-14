@@ -1,5 +1,6 @@
 {
-  "title": "AGENT",
+  "title": "AGENTS",
+  "description": "Streamline business operations for local service providers with a secure platform that integrates AI agents and authorized users for seamless management.",
   "robots": {
     "index": false
   },
