@@ -8,6 +8,7 @@ import {
 } from '../data/model'
 import { Panel, SectionLabel, Avatar, Badge, StatusDot, PriorityIcon, Button } from '../components/ui'
 import { Page, Row, GroupHeader } from './parts'
+import { useToast } from '../components/Toast'
 
 function Card({ title, icon, count, children, cta }: { title: string; icon: React.ReactNode; count?: number; children: React.ReactNode; cta?: string }) {
   return (
@@ -34,6 +35,7 @@ function MiniRow({ children, dot }: { children: React.ReactNode; dot?: React.Rea
 
 export function Today() {
   const [note, setNote] = useState('')
+  const { notify } = useToast()
   const overdue = tasks.filter((t) => t.due === 'Today' || t.due === 'Blocked')
   const atRisk = opportunities.filter((o) => o.atRisk)
   const won = opportunities.filter((o) => o.stage === 'won').reduce((s, o) => s + o.value, 0)
@@ -80,8 +82,8 @@ export function Today() {
                   <span className="text-[var(--color-text-muted)] truncate hidden sm:inline">· {a.detail}</span>
                   <div className="ml-auto flex items-center gap-1.5 shrink-0">
                     <span className="text-[11px] text-[var(--color-text-muted)]">{a.agent}</span>
-                    <Button size="sm" variant="ghost">Reject</Button>
-                    <Button size="sm" variant="primary">Approve</Button>
+                    <Button size="sm" variant="ghost" onClick={() => notify('Rejected locally. This preview did not change an approval.')}>Reject</Button>
+                    <Button size="sm" variant="primary" onClick={() => notify('Approved locally. This preview did not run the action.')}>Approve</Button>
                   </div>
                 </MiniRow>
               ))}
@@ -151,13 +153,14 @@ export function Today() {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Log a note, task, or ask an agent…"
+                aria-label="Fast capture"
                 rows={2}
                 className="w-full resize-none bg-[var(--color-surface)] border border-[var(--color-border-input)] rounded-[8px] px-3 py-2 text-base sm:text-[13px] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-brand)]"
               />
               <div className="flex items-center gap-1.5 mt-2">
-                <Button size="sm" variant="ghost"><Plus size={13} /> Task</Button>
-                <Button size="sm" variant="ghost"><MessageSquare size={13} /> Note</Button>
-                <Button size="sm" variant="primary" className="ml-auto">Capture</Button>
+                <Button size="sm" variant="ghost" onClick={() => notify('Task capture is a local preview.')}><Plus size={13} /> Task</Button>
+                <Button size="sm" variant="ghost" onClick={() => notify('Note capture is a local preview.')}><MessageSquare size={13} /> Note</Button>
+                <Button size="sm" variant="primary" className="ml-auto" onClick={() => { if (!note.trim()) return notify('Enter a note before capturing it.'); setNote(''); notify('Saved for this preview only.') }}>Capture</Button>
               </div>
             </Panel>
           </div>
@@ -259,6 +262,8 @@ export function Notifications() {
 export function Inbox() {
   const [sel, setSel] = useState<InboxItem>(inbox[0])
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [comment, setComment] = useState('')
+  const { notify } = useToast()
   return (
     <div className="h-full flex flex-col md:flex-row">
       {/* list pane */}
@@ -277,7 +282,7 @@ export function Inbox() {
               }`}
             >
               <div className="flex items-center gap-2 mb-0.5">
-                <Avatar {...(personById('u_' + it.actor) || { initials: it.actor === 'agent' ? '🤖' : it.actor[0].toUpperCase(), color: it.actor === 'agent' ? '#5e6ad2' : '#3a3a40' })} size={20} />
+                <Avatar {...(personById('u_' + it.actor) || { initials: it.actor === 'agent' ? '🤖' : it.actor[0].toUpperCase(), color: it.actor === 'agent' ? 'var(--color-brand)' : 'var(--color-avatar-fallback)' })} size={20} />
                 <span className="text-[13px] w-medium truncate flex-1">{it.title}</span>
                 {it.unread && <StatusDot color="indigo" size={7} />}
               </div>
@@ -341,9 +346,11 @@ export function Inbox() {
             </div>
           ))}
 
-          <div className="rounded-[10px] bg-[var(--color-surface)] border border-[var(--color-border-input)] px-3.5 h-11 flex items-center text-[13px] text-[var(--color-text-muted)] mt-2">
-            Add a comment…
-          </div>
+          <form onSubmit={(event) => { event.preventDefault(); if (!comment.trim()) return; setComment(''); notify('Comment added for this preview only.') }} className="mt-2 flex gap-2">
+            <label className="sr-only" htmlFor="inbox-comment">Add a comment</label>
+            <input id="inbox-comment" value={comment} onChange={(event) => setComment(event.target.value)} placeholder="Add a comment…" className="min-w-0 flex-1 rounded-[10px] border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3.5 text-base sm:text-[13px] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]" />
+            <Button type="submit" size="sm" variant="primary">Send</Button>
+          </form>
         </div>
       </div>
 

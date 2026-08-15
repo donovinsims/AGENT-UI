@@ -45,8 +45,8 @@ export function Page({
         )}
         <div className="ml-auto flex items-center gap-1">
           {actions}
-          <button className="grid place-items-center h-7 w-7 rounded-[6px] text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)]"><ListFilter size={15} /></button>
-          <button className="grid place-items-center h-7 w-7 rounded-[6px] text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)]"><SlidersHorizontal size={15} /></button>
+          <button aria-label="Filter view" className="grid place-items-center h-7 w-7 rounded-[6px] text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)]"><ListFilter size={15} /></button>
+          <button aria-label="View settings" className="grid place-items-center h-7 w-7 rounded-[6px] text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)]"><SlidersHorizontal size={15} /></button>
         </div>
       </div>
       {/* provide selected view to children via data attr on wrapper */}
@@ -72,6 +72,9 @@ export function Row({ children, onClick, className = '' }: { children: ReactNode
   return (
     <div
       onClick={onClick}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onKeyDown={interactive ? (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onClick?.() } } : undefined}
       className={`group flex items-center gap-3 h-[38px] px-4 md:px-5 border-b border-[var(--color-hairline)] ${
         interactive ? 'hover:bg-[var(--color-level-2)] transition-colors duration-100 cursor-pointer' : ''
       } ${className}`}

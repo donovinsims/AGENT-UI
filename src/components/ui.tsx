@@ -112,7 +112,7 @@ export function Avatar({ name, color, initials, size = 20 }: { name?: string; co
     <span
       title={name}
       className="grid place-items-center rounded-full text-white w-medium shrink-0"
-      style={{ width: size, height: size, background: color || '#3a3a40', fontSize: size * 0.42 }}
+      style={{ width: size, height: size, background: color || 'var(--color-avatar-fallback)', fontSize: size * 0.42 }}
     >
       {initials}
     </span>

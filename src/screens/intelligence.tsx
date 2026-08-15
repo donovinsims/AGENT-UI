@@ -6,6 +6,7 @@ import {
 } from '../data/model'
 import { Panel, Button, Badge, StatusDot, Ring, SectionLabel } from '../components/ui'
 import { Page, Row } from './parts'
+import { useToast } from '../components/Toast'
 
 const AUTONOMY: { id: AutonomyLevel; label: string }[] = [
   { id: 'observe', label: 'Observe' },
@@ -111,6 +112,8 @@ export function Agents() {
 
 function AgentDetail({ agent, onBack }: { agent: Agent; onBack: () => void }) {
   const runs = agentRuns.filter((r) => r.agentId === agent.id)
+  const [autonomy, setAutonomy] = useState(agent.autonomy)
+  const { notify } = useToast()
   return (
     <div className="h-full flex flex-col">
       <div className="h-11 shrink-0 flex items-center gap-2 px-4 md:px-5 border-b border-[var(--color-hairline)]">
@@ -130,7 +133,7 @@ function AgentDetail({ agent, onBack }: { agent: Agent; onBack: () => void }) {
             <SectionLabel className="mb-2">Autonomy level</SectionLabel>
             <div className="flex items-center gap-0.5 rounded-[8px] bg-[var(--color-level-2)] p-0.5 w-fit">
               {AUTONOMY.map((l) => (
-                <span key={l.id} className={`h-7 px-3 grid place-items-center rounded-[6px] text-[12px] w-medium ${l.id === agent.autonomy ? 'bg-[var(--color-brand)] text-white' : 'text-[var(--color-text-tertiary)]'}`}>{l.label}</span>
+                <button key={l.id} onClick={() => { setAutonomy(l.id); notify(`${agent.name} is set to ${l.label.toLowerCase()} for this preview.`) }} aria-pressed={l.id === autonomy} className={`h-7 px-3 grid place-items-center rounded-[6px] text-[12px] w-medium ${l.id === autonomy ? 'bg-[var(--color-brand)] text-white' : 'text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)]'}`}>{l.label}</button>
               ))}
             </div>
             <p className="text-[12px] text-[var(--color-text-muted)] mt-2">Higher levels can act without approval within granted scopes. Sensitive scopes always require confirmation.</p>
@@ -182,10 +185,12 @@ function AgentDetail({ agent, onBack }: { agent: Agent; onBack: () => void }) {
 
 // ---------- Approvals ----------
 export function Approvals() {
+  const [pending, setPending] = useState(() => approvals.map((approval) => approval.id))
+  const { notify } = useToast()
   return (
     <Page title="Approvals" count={approvals.length}>
       <div className="p-4 md:p-6 space-y-3 max-w-[760px]">
-        {approvals.map((a) => (
+        {approvals.filter((approval) => pending.includes(approval.id)).map((a) => (
           <Panel key={a.id} className="p-4">
             <div className="flex items-start gap-3">
               <span className="mt-0.5"><StatusDot color={a.risk} /></span>
@@ -200,8 +205,8 @@ export function Approvals() {
               </div>
             </div>
             <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[var(--color-hairline)]">
-              <Button size="sm" variant="primary"><Check size={14} /> Approve</Button>
-              <Button size="sm" variant="secondary"><X size={14} /> Reject</Button>
+              <Button size="sm" variant="primary" onClick={() => { setPending((items) => items.filter((id) => id !== a.id)); notify('Approved locally. This preview did not run the action.') }}><Check size={14} /> Approve</Button>
+              <Button size="sm" variant="secondary" onClick={() => { setPending((items) => items.filter((id) => id !== a.id)); notify('Rejected locally. This preview did not change an approval.') }}><X size={14} /> Reject</Button>
               <Button size="sm" variant="ghost" className="ml-auto">View details</Button>
             </div>
           </Panel>
@@ -214,13 +219,16 @@ export function Approvals() {
 // ---------- Automations ----------
 export function Automations() {
   const [state, setState] = useState(() => Object.fromEntries(automations.map((a) => [a.id, a.enabled])))
+  const { notify } = useToast()
   return (
     <Page title="Automations" count={automations.length} actions={<Button size="sm" variant="primary"><Plus size={14} /> New automation</Button>}>
       <div>
         {automations.map((a) => (
           <Row key={a.id} className="!h-[54px]">
             <button
-              onClick={() => setState((s) => ({ ...s, [a.id]: !s[a.id] }))}
+              onClick={() => { setState((s) => ({ ...s, [a.id]: !s[a.id] })); notify(`${a.name} updated for this preview only.`) }}
+              aria-label={`${state[a.id] ? 'Pause' : 'Enable'} ${a.name}`}
+              aria-pressed={state[a.id]}
               className={`relative h-[18px] w-[30px] rounded-full transition-colors shrink-0 ${state[a.id] ? 'bg-[var(--color-brand)]' : 'bg-[var(--color-surface-raised)]'}`}
             >
               <span className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-white transition-[left] ${state[a.id] ? 'left-[14px]' : 'left-[2px]'}`} />

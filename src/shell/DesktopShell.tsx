@@ -1,17 +1,18 @@
 import { type ReactNode } from 'react'
 import {
-  Search, PenSquare, ChevronLeft, ChevronRight, Clock, ChevronDown, Plus, HelpCircle, Circle,
+  Search, PenSquare, ChevronLeft, ChevronRight, Clock, ChevronDown, Plus, HelpCircle, Circle, Moon, Sun,
 } from 'lucide-react'
 import { NAV, itemById } from '../lib/nav'
 import { owner } from '../data/model'
 import { IconButton, Kbd, Avatar } from '../components/ui'
+import { useTheme } from '../theme/ThemeProvider'
 
 function LinearMark() {
   return (
-    <span className="grid place-items-center h-6 w-6 rounded-[7px] bg-[var(--color-surface-3,#28282c)] shrink-0" style={{ background: '#2a2a2e' }}>
+    <span className="grid place-items-center h-6 w-6 rounded-[7px] bg-[var(--color-mark-surface)] shrink-0">
       <span
         className="h-3.5 w-3.5 rounded-full"
-        style={{ background: 'conic-gradient(from 210deg, #f7f8f8 0 55%, #5e6ad2 55% 100%)' }}
+        style={{ background: 'conic-gradient(from 210deg, var(--color-mark-foreground) 0 55%, var(--color-brand) 55% 100%)' }}
       />
     </span>
   )
@@ -28,6 +29,7 @@ export function DesktopShell({
   openCommand: () => void
   children: ReactNode
 }) {
+  const { theme, toggleTheme } = useTheme()
   const current = itemById(active)
   return (
     <div className="h-screen w-screen overflow-hidden bg-[var(--color-canvas)] flex text-[var(--color-text-primary)]">
@@ -45,7 +47,7 @@ export function DesktopShell({
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto scroll-quiet px-2 pb-3">
+        <nav aria-label="Primary navigation" className="flex-1 overflow-y-auto scroll-quiet px-2 pb-3">
           {NAV.map((section) => (
             <div key={section.id} className="mb-3">
               <div className="px-2 pt-2 pb-1">
@@ -59,6 +61,7 @@ export function DesktopShell({
                   <button
                     key={item.id}
                     onClick={() => navigate(item.id)}
+                    aria-current={on ? 'page' : undefined}
                     className={`group w-full flex items-center gap-2.5 h-7 px-2 rounded-[6px] text-[13px] w-medium transition-colors duration-100 ${
                       on
                         ? 'bg-[var(--color-surface-raised)] text-[var(--color-text-primary)]'
@@ -103,6 +106,7 @@ export function DesktopShell({
             <span className="w-medium">{current?.label ?? 'Operator OS'}</span>
           </div>
           <div className="ml-auto flex items-center gap-1.5">
+            <IconButton onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}><>{theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}</></IconButton>
             <button
               onClick={openCommand}
               className="hidden lg:flex items-center gap-2 h-8 px-2.5 rounded-[8px] border border-[var(--color-border)] text-[12px] text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)] transition-colors"

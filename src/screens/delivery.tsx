@@ -1,6 +1,6 @@
 import { Plus, File as FileIcon, Paperclip, BookOpen, Bot } from 'lucide-react'
 import {
-  clients, projects, tasks, files, knowledge,
+  clients, projects, tasks, files, knowledge, meetings,
   PROJECT_STATES, TASK_STATES, companyById, personById, projectById,
 } from '../data/model'
 import { Panel, Avatar, Badge, StatusDot, PriorityIcon, Button, Ring } from '../components/ui'
@@ -216,24 +216,36 @@ export function Tasks() {
 // ---------- Calendar ----------
 export function Calendar() {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  const start = 11 // Aug 11 Monday
-  const events: Record<number, { label: string; color: string }[]> = {
-    14: [{ label: 'Summit Discovery 2p', color: 'blue' }, { label: 'Harbor Demo 4:30p', color: 'indigo' }],
-    15: [{ label: 'Northwind sync 10a', color: 'green' }],
-    18: [{ label: 'BrightSmile renewal 1p', color: 'orange' }],
-    20: [{ label: 'Verde handoff', color: 'teal' }],
-    16: [{ label: 'PRJ-24 QA due', color: 'yellow' }],
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = today.getMonth()
+  const first = new Date(year, month, 1)
+  const firstOffset = (first.getDay() + 6) % 7
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const eventDate = (when: string) => {
+    if (when.startsWith('Today')) return today.getDate()
+    if (when.startsWith('Tomorrow')) return new Date(year, month, today.getDate() + 1).getDate()
+    const found = when.match(/^([A-Z][a-z]{2}) (\d{1,2})/)
+    if (!found) return null
+    const eventMonth = new Date(`${found[1]} 1, ${year}`).getMonth()
+    return eventMonth === month ? Number(found[2]) : null
   }
+  const events = meetings.reduce<Record<number, { label: string; color: string }[]>>((result, meeting) => {
+    const date = eventDate(meeting.when)
+    if (date) (result[date] ??= []).push({ label: meeting.title, color: meeting.type === 'Client' ? 'green' : meeting.type === 'Demo' ? 'indigo' : 'blue' })
+    return result
+  }, {})
   return (
     <Page title="Calendar" views={['Month', 'Week', 'Agenda']}>
       <div className="p-4 md:p-6">
+        <h2 className="mb-3 text-[15px] w-semibold">{first.toLocaleString(undefined, { month: 'long', year: 'numeric' })}</h2>
         <div className="grid grid-cols-7 gap-px bg-[var(--color-hairline)] rounded-[12px] overflow-hidden border border-[var(--color-hairline)]">
           {days.map((d) => <div key={d} className="bg-[var(--color-level-1)] px-2 py-1.5 text-[11px] w-medium uppercase tracking-[0.05em] text-[var(--color-text-muted)]">{d}</div>)}
-          {Array.from({ length: 28 }).map((_, i) => {
-            const date = start + i - 3
-            const inMonth = date >= 1 && date <= 31
+          {Array.from({ length: Math.ceil((firstOffset + daysInMonth) / 7) * 7 }).map((_, i) => {
+            const date = i - firstOffset + 1
+            const inMonth = date >= 1 && date <= daysInMonth
             const evs = events[date] || []
-            const isToday = date === 14
+            const isToday = date === today.getDate()
             return (
               <div key={i} className="bg-[var(--color-canvas)] min-h-[92px] p-1.5">
                 <div className={`text-[12px] tabular mb-1 ${isToday ? 'grid place-items-center h-5 w-5 rounded-full bg-[var(--color-brand)] text-white' : inMonth ? 'text-[var(--color-text-tertiary)]' : 'text-[var(--color-text-muted)] opacity-40'}`}>{inMonth ? date : ''}</div>

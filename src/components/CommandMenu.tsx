@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Search, CornerDownLeft, Plus, Send, Bot, CheckSquare, FileText } from 'lucide-react'
+import { Search, CornerDownLeft, Plus, Send, Bot, CheckSquare, FileText, Moon, Sun } from 'lucide-react'
 import { NAV } from '../lib/nav'
 import { Kbd } from './ui'
+import { useTheme } from '../theme/ThemeProvider'
+import { useFocusTrap } from './useFocusTrap'
 
 interface Cmd {
   id: string
@@ -20,12 +22,16 @@ export function CommandMenu({
   onClose: () => void
   navigate: (id: string) => void
 }) {
+  const { theme, toggleTheme } = useTheme()
   const [query, setQuery] = useState('')
   const [sel, setSel] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(open, dialogRef)
 
   const commands = useMemo<Cmd[]>(() => {
     const actions: Cmd[] = [
+      { id: 'act-theme', label: `Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`, hint: 'Appearance', icon: theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />, run: toggleTheme },
       { id: 'act-lead', label: 'Create lead', hint: 'Action', icon: <Plus size={15} />, run: () => navigate('leads') },
       { id: 'act-task', label: 'Create task', hint: 'Action', icon: <CheckSquare size={15} />, run: () => navigate('tasks') },
       { id: 'act-outreach', label: 'Draft outreach', hint: 'Action', icon: <Send size={15} />, run: () => navigate('outreach') },
@@ -42,7 +48,7 @@ export function CommandMenu({
       })),
     )
     return [...actions, ...nav]
-  }, [navigate])
+  }, [navigate, theme, toggleTheme])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -74,6 +80,10 @@ export function CommandMenu({
       onMouseDown={onClose}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command menu"
         className="w-full max-w-[600px] rounded-[12px] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-stack overflow-hidden animate-menu"
         onMouseDown={(e) => e.stopPropagation()}
         onKeyDown={(e) => {
@@ -90,6 +100,7 @@ export function CommandMenu({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search or run a command…"
+            aria-label="Search commands"
             className="flex-1 bg-transparent outline-none text-base sm:text-[14px] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]"
           />
           <Kbd>Esc</Kbd>

@@ -3,6 +3,7 @@ import { Plus, Copy, Check, TrendingUp, TrendingDown, Bot } from 'lucide-react'
 import { activities, integrations, personById, opportunities, projects, fmtMoney } from '../data/model'
 import { Panel, Badge, StatusDot, Avatar, Button, SectionLabel } from '../components/ui'
 import { Page } from './parts'
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
 const kindColor = { sales: 'blue', delivery: 'teal', agent: 'indigo', system: 'gray' } as const
 
@@ -41,22 +42,24 @@ export function Reports() {
     { m: 'Mar', v: 38 }, { m: 'Apr', v: 52 }, { m: 'May', v: 44 },
     { m: 'Jun', v: 61 }, { m: 'Jul', v: 73 }, { m: 'Aug', v: 68 },
   ]
-  const max = Math.max(...bars.map((b) => b.v))
+  const contentByView = {
+    Overview: { title: 'Revenue won — last 6 months', metrics: [['Pipeline value', fmtMoney(pipelineValue), '+12%'], ['Win rate', '34%', '+4pt'], ['Active projects', String(projects.length), '+2'], ['Avg cycle time', '18d', '-3d']] },
+    Sales: { title: 'Sales velocity — last 6 months', metrics: [['Open pipeline', fmtMoney(pipelineValue), '+12%'], ['Qualified deals', '14', '+3'], ['Proposals sent', '9', '+2'], ['Win rate', '34%', '+4pt']] },
+    Delivery: { title: 'Delivery throughput — last 6 months', metrics: [['Active projects', String(projects.length), '+2'], ['On-track projects', '2', '+1'], ['Average progress', '61%', '+5pt'], ['Cycle time', '18d', '-3d']] },
+    Agents: { title: 'Agent runs — last 6 months', metrics: [['Runs completed', '328', '+18%'], ['Success rate', '96%', '+2pt'], ['Approvals requested', '18', '-4'], ['Fallback rate', '3%', '-1pt']] },
+  }
   return (
     <Page title="Reports" views={['Overview', 'Sales', 'Delivery', 'Agents']}>
-      <div className="p-4 md:p-6 space-y-4 max-w-[1100px]">
+      {(selectedView) => {
+        const content = contentByView[(selectedView ?? 'Overview') as keyof typeof contentByView]
+        return <div className="p-4 md:p-6 space-y-4 max-w-[1100px]">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { label: 'Pipeline value', value: fmtMoney(pipelineValue), delta: '+12%', up: true },
-            { label: 'Win rate', value: '34%', delta: '+4pt', up: true },
-            { label: 'Active projects', value: String(projects.length), delta: '+2', up: true },
-            { label: 'Avg cycle time', value: '18d', delta: '-3d', up: true },
-          ].map((k) => (
-            <Panel key={k.label} className="p-4">
-              <div className="text-[12px] text-[var(--color-text-muted)]">{k.label}</div>
-              <div className="text-[24px] w-semibold tabular mt-1.5 leading-none">{k.value}</div>
-              <div className={`flex items-center gap-1 mt-2 text-[12px] w-medium ${k.up ? 'text-[var(--color-status-green)]' : 'text-[var(--color-status-red)]'}`}>
-                {k.up ? <TrendingUp size={13} /> : <TrendingDown size={13} />} {k.delta}
+          {content.metrics.map(([label, value, delta]) => (
+            <Panel key={label} className="p-4">
+              <div className="text-[12px] text-[var(--color-text-muted)]">{label}</div>
+              <div className="text-[24px] w-semibold tabular mt-1.5 leading-none">{value}</div>
+              <div className="flex items-center gap-1 mt-2 text-[12px] w-medium text-[var(--color-status-green)]">
+                <TrendingUp size={13} /> {delta}
               </div>
             </Panel>
           ))}
@@ -64,19 +67,13 @@ export function Reports() {
 
         <Panel className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-[13px] w-semibold">Revenue won — last 6 months</span>
+            <span className="text-[13px] w-semibold">{content.title}</span>
             <Badge color="green">$336k total</Badge>
           </div>
-          <div className="flex items-end gap-3 h-40">
-            {bars.map((b) => (
-              <div key={b.m} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full rounded-t-[5px] bg-[var(--color-brand)] transition-[height,opacity]" style={{ height: `${(b.v / max) * 100}%`, opacity: 0.55 + (b.v / max) * 0.45 }} />
-                <span className="text-[11px] text-[var(--color-text-muted)]">{b.m}</span>
-              </div>
-            ))}
-          </div>
+          <div className="h-48" aria-label={`${content.title} chart`}><ResponsiveContainer width="100%" height="100%"><BarChart data={bars}><CartesianGrid stroke="var(--color-hairline)" vertical={false} /><XAxis dataKey="m" tickLine={false} axisLine={false} tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} /><YAxis hide /><Tooltip cursor={{ fill: 'var(--color-level-2)' }} contentStyle={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 8 }} /><Bar dataKey="v" fill="var(--color-brand)" radius={[5, 5, 0, 0]} /></BarChart></ResponsiveContainer></div>
         </Panel>
       </div>
+      }}
     </Page>
   )
 }

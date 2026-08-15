@@ -6,6 +6,7 @@ import {
 } from '../data/model'
 import { Panel, Avatar, Badge, StatusDot, PriorityIcon, Button, SectionLabel, Ring } from '../components/ui'
 import { Page, Row, GroupHeader, FilterButton } from './parts'
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
 // ---------- Sales Overview ----------
 export function SalesOverview() {
@@ -13,7 +14,6 @@ export function SalesOverview() {
   const byStage = STAGES.filter((s) => !['won', 'lost'].includes(s.id)).map((s) => ({
     ...s, items: open.filter((o) => o.stage === s.id), value: open.filter((o) => o.stage === s.id).reduce((a, o) => a + o.value, 0),
   }))
-  const max = Math.max(...byStage.map((s) => s.value), 1)
   const won = opportunities.filter((o) => o.stage === 'won')
   return (
     <div className="h-full overflow-y-auto scroll-quiet px-4 md:px-8 py-6 max-w-[1180px] mx-auto">
@@ -35,20 +35,7 @@ export function SalesOverview() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <Panel className="p-4">
           <SectionLabel className="mb-4">Pipeline by stage</SectionLabel>
-          <div className="flex flex-col gap-3">
-            {byStage.map((s) => (
-              <div key={s.id} className="flex items-center gap-3">
-                <div className="w-[120px] flex items-center gap-2 shrink-0">
-                  <StatusDot color={s.color} />
-                  <span className="text-[12px] text-[var(--color-text-secondary)] truncate">{s.label}</span>
-                </div>
-                <div className="flex-1 h-2 rounded-full bg-[var(--color-level-2)] overflow-hidden">
-                  <div className="h-full rounded-full" style={{ width: `${(s.value / max) * 100}%`, background: 'var(--color-brand)' }} />
-                </div>
-                <span className="w-[52px] text-right text-[12px] tabular text-[var(--color-text-secondary)]">{fmtMoney(s.value)}</span>
-              </div>
-            ))}
-          </div>
+          <div className="h-52" aria-label="Pipeline value by stage"><ResponsiveContainer width="100%" height="100%"><BarChart data={byStage} layout="vertical" margin={{ left: 8 }}><XAxis type="number" hide /><YAxis type="category" dataKey="label" width={76} tickLine={false} axisLine={false} tick={{ fill: 'var(--color-text-tertiary)', fontSize: 11 }} /><Tooltip formatter={(value) => fmtMoney(Number(value ?? 0))} cursor={{ fill: 'var(--color-level-2)' }} contentStyle={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 8 }} /><Bar dataKey="value" fill="var(--color-brand)" radius={[0, 5, 5, 0]} /></BarChart></ResponsiveContainer></div>
         </Panel>
         <Panel className="p-4">
           <SectionLabel className="mb-4">Leaderboard</SectionLabel>

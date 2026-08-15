@@ -4,6 +4,9 @@ import { MobileShell } from './shell/MobileShell'
 import { CommandMenu } from './components/CommandMenu'
 import { SCREENS } from './screens'
 import { itemById } from './lib/nav'
+import { ThemeProvider } from './theme/ThemeProvider'
+import { ToastProvider } from './components/Toast'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 function useIsMobile() {
   const [mobile, setMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : false))
@@ -40,10 +43,10 @@ export default function App() {
     setCmdOpen(false)
   }
 
-  const screen = <Screen key={routeId} />
+  const screen = <ErrorBoundary><Screen key={routeId} /></ErrorBoundary>
 
   return (
-    <>
+    <ThemeProvider><ToastProvider>
       {isMobile ? (
         <MobileShell active={active} navigate={navigate}>
           {screen}
@@ -54,6 +57,6 @@ export default function App() {
         </DesktopShell>
       )}
       <CommandMenu open={cmdOpen} onClose={() => setCmdOpen(false)} navigate={navigate} />
-    </>
+    </ToastProvider></ThemeProvider>
   )
 }
