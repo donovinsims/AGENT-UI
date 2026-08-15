@@ -1,6 +1,13 @@
 # Operator OS — Authoritative Codex / AI Agent Handoff
 
-> Last updated: 2026-08-14. Source of truth for any AI agent or contributor picking this up.
+> Last updated: 2026-08-15. Source of truth for any AI agent or contributor picking this up.
+
+## Deployment
+
+- **Canonical Vercel URL:** https://agent-ui-delta-two.vercel.app
+- **Runtime:** standard Vite deployment on Vercel, temporarily `noindex` while the generated hostname is used.
+- **Git source:** `donovinsims/AGENT-UI`; Vercel is connected with `main` configured as the production branch.
+- **Figma Make:** design/reference source only. Its existing site remains untouched until the remaining browser and accessibility acceptance is complete.
 
 ---
 
