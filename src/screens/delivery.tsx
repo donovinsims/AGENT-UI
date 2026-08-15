@@ -196,7 +196,7 @@ export function Tasks() {
                       <PriorityIcon priority={t.priority} />
                       <StatusDot color={s.color} ring={s.id !== 'done'} />
                       <span className="text-[12px] tabular text-[var(--color-text-muted)] w-[78px] shrink-0">{t.ref}</span>
-                      <span className="text-[13px] truncate flex-1">{t.title}</span>
+                      <span className="text-[13px] truncate flex-1" title={t.title}>{t.title}</span>
                       {t.agentAssigned && <Badge color="indigo">agent</Badge>}
                       {t.labels.map((l) => <Badge key={l} className="hidden lg:inline-flex">{l}</Badge>)}
                       {t.due && <span className={`text-[12px] w-[56px] text-right ${t.due === 'Blocked' ? 'text-[var(--color-status-red)]' : 'text-[var(--color-text-tertiary)]'}`}>{t.due}</span>}

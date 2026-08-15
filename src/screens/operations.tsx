@@ -70,7 +70,7 @@ export function Reports() {
           <div className="flex items-end gap-3 h-40">
             {bars.map((b) => (
               <div key={b.m} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full rounded-t-[5px] bg-[var(--color-brand)] transition-all" style={{ height: `${(b.v / max) * 100}%`, opacity: 0.55 + (b.v / max) * 0.45 }} />
+                <div className="w-full rounded-t-[5px] bg-[var(--color-brand)] transition-[height,opacity]" style={{ height: `${(b.v / max) * 100}%`, opacity: 0.55 + (b.v / max) * 0.45 }} />
                 <span className="text-[11px] text-[var(--color-text-muted)]">{b.m}</span>
               </div>
             ))}

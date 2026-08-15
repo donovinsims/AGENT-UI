@@ -223,7 +223,7 @@ export function Automations() {
               onClick={() => setState((s) => ({ ...s, [a.id]: !s[a.id] }))}
               className={`relative h-[18px] w-[30px] rounded-full transition-colors shrink-0 ${state[a.id] ? 'bg-[var(--color-brand)]' : 'bg-[var(--color-surface-raised)]'}`}
             >
-              <span className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-white transition-all ${state[a.id] ? 'left-[14px]' : 'left-[2px]'}`} />
+              <span className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-white transition-[left] ${state[a.id] ? 'left-[14px]' : 'left-[2px]'}`} />
             </button>
             <div className="min-w-0 flex-1">
               <div className="text-[13px] w-medium truncate">{a.name}</div>

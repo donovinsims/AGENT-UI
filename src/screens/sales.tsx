@@ -90,9 +90,9 @@ export function Leads() {
               {items.map((l) => (
                 <Row key={l.id}>
                   <span className="grid place-items-center h-4 w-8 rounded-[4px] text-[10px] w-bold tabular shrink-0" style={{ background: l.score >= 70 ? 'rgba(39,166,68,.15)' : l.score >= 45 ? 'rgba(240,191,0,.15)' : 'rgba(98,102,109,.15)', color: l.score >= 70 ? 'var(--color-status-green)' : l.score >= 45 ? 'var(--color-status-yellow)' : 'var(--color-text-muted)' }}>{l.score}</span>
-                  <span className="text-[13px] w-medium truncate">{l.name}</span>
-                  <span className="text-[13px] text-[var(--color-text-tertiary)] truncate">{l.company}</span>
-                  <span className="text-[12px] text-[var(--color-text-muted)] hidden md:inline truncate flex-1">{l.evidence || l.title}</span>
+                  <span className="text-[13px] w-medium truncate" title={l.name}>{l.name}</span>
+                  <span className="text-[13px] text-[var(--color-text-tertiary)] truncate" title={l.company}>{l.company}</span>
+                  <span className="text-[12px] text-[var(--color-text-muted)] hidden md:inline truncate flex-1" title={l.evidence || l.title}>{l.evidence || l.title}</span>
                   <Badge className="ml-auto shrink-0">{l.source}</Badge>
                   <span className="text-[12px] text-[var(--color-text-muted)] w-[52px] text-right shrink-0">{l.createdAt}</span>
                   <Avatar {...personById(l.owner)!} size={20} />
@@ -130,7 +130,7 @@ export function Companies() {
             <span className="w-[90px] text-[12px] text-[var(--color-text-tertiary)] hidden lg:block">{c.size}</span>
             <span className="w-[120px] hidden lg:block"><Badge color={c.lifecycle === 'active_client' ? 'green' : c.lifecycle === 'prospect' ? 'blue' : 'gray'}>{c.lifecycle.replace('_', ' ')}</Badge></span>
             <span className="w-[70px]">{c.health && <StatusDot color={c.health} />}</span>
-            <button className="w-6 grid place-items-center text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100"><MoreHorizontal size={15} /></button>
+            <button className="w-6 grid place-items-center text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"><MoreHorizontal size={15} /></button>
           </Row>
         ))}
       </div>
@@ -147,10 +147,10 @@ export function Contacts() {
           <Row key={c.id}>
             <Avatar {...c} size={24} />
             <div className="flex-1 min-w-0">
-              <div className="text-[13px] w-medium truncate">{c.name}</div>
-              <div className="text-[11px] text-[var(--color-text-muted)] truncate">{c.title} · {companyById(c.companyId).name}</div>
+              <div className="text-[13px] w-medium truncate" title={c.name}>{c.name}</div>
+              <div className="text-[11px] text-[var(--color-text-muted)] truncate" title={`${c.title} · ${companyById(c.companyId).name}`}>{c.title} · {companyById(c.companyId).name}</div>
             </div>
-            <span className="text-[12px] text-[var(--color-text-tertiary)] hidden md:block truncate w-[200px]">{c.email}</span>
+            <span className="text-[12px] text-[var(--color-text-tertiary)] hidden md:block truncate w-[200px]" title={c.email}>{c.email}</span>
             <span className="text-[12px] text-[var(--color-text-muted)] hidden lg:block tabular w-[130px]">{c.phone}</span>
             <span className="text-[12px] text-[var(--color-text-muted)] w-[60px] text-right">{c.lastTouch}</span>
           </Row>
@@ -245,7 +245,7 @@ function PipelineList() {
               <Row key={o.id}>
                 <PriorityIcon priority={o.priority} />
                 <span className="text-[12px] tabular text-[var(--color-text-muted)] w-[64px] shrink-0">{o.ref}</span>
-                <span className="text-[13px] w-medium truncate">{o.title}</span>
+                <span className="text-[13px] w-medium truncate" title={o.title}>{o.title}</span>
                 <span className="text-[12px] text-[var(--color-text-tertiary)] hidden md:inline">{companyById(o.companyId).name}</span>
                 {o.atRisk && <Badge color="red">at risk</Badge>}
                 <div className="ml-auto flex items-center gap-3 shrink-0">
@@ -362,7 +362,7 @@ export function Proposals() {
           <Row key={p.id}>
             <FileText size={15} className="text-[var(--color-text-tertiary)] shrink-0" />
             <span className="text-[12px] tabular text-[var(--color-text-muted)] w-[70px] shrink-0">{p.ref}</span>
-            <span className="text-[13px] w-medium truncate flex-1">{p.title}</span>
+            <span className="text-[13px] w-medium truncate flex-1" title={p.title}>{p.title}</span>
             <span className="text-[12px] text-[var(--color-text-tertiary)] hidden md:inline">{companyById(p.companyId).name}</span>
             <Badge color={statusColor[p.status]} className="capitalize">{p.status.replace('_', ' ')}</Badge>
             <span className="text-[13px] tabular w-medium w-[60px] text-right">{fmtMoney(p.value)}</span>

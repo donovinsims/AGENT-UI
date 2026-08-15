@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  ShieldCheck, AlertTriangle, CalendarClock, Bot, ArrowUpRight, Plus, MessageSquare, Trash2, Clock, Circle,
+  ShieldCheck, AlertTriangle, CalendarClock, Bot, ArrowUpRight, Plus, MessageSquare, Trash2, Clock, Circle, ArrowLeft,
 } from 'lucide-react'
 import {
   approvals, tasks, opportunities, meetings, agentRuns, notifications, inbox,
@@ -48,7 +48,7 @@ export function Today() {
           <h1 className="text-[22px] title">Good morning, {owner.name.split(' ')[0]}</h1>
           <span className="text-[13px] text-[var(--color-text-muted)]">Thursday, Aug 14</span>
         </div>
-        <p className="text-[14px] text-[var(--color-text-secondary)] mb-5 max-w-3xl leading-relaxed">
+        <p className="text-[14px] text-[var(--color-text-secondary)] mb-5 max-w-[65ch] leading-relaxed">
           <span className="text-[var(--color-brand)] w-medium">Executive brief · </span>
           3 approvals waiting, 2 deals at risk (BrightSmile & Harbor), and Northwind delivery is on track at 66%.
           Agents ran 43 tasks overnight with 1 failure on the pipeline scan. Mac Runner is offline — FCM routing unavailable.
@@ -152,7 +152,7 @@ export function Today() {
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Log a note, task, or ask an agent…"
                 rows={2}
-                className="w-full resize-none bg-[var(--color-surface)] border border-[var(--color-border-input)] rounded-[8px] px-3 py-2 text-[13px] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-brand)]"
+                className="w-full resize-none bg-[var(--color-surface)] border border-[var(--color-border-input)] rounded-[8px] px-3 py-2 text-base sm:text-[13px] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-brand)]"
               />
               <div className="flex items-center gap-1.5 mt-2">
                 <Button size="sm" variant="ghost"><Plus size={13} /> Task</Button>
@@ -184,7 +184,7 @@ export function MyWork() {
                     <PriorityIcon priority={t.priority} />
                     <StatusDot color={g.color} ring={g.id !== 'done'} />
                     <span className="text-[12px] tabular text-[var(--color-text-muted)] w-[74px] shrink-0">{t.ref}</span>
-                    <span className="text-[13px] truncate flex-1">{t.title}</span>
+                    <span className="text-[13px] truncate flex-1" title={t.title}>{t.title}</span>
                     {t.agentAssigned && <Badge color="indigo">agent</Badge>}
                     {t.labels.map((l) => <Badge key={l}>{l}</Badge>)}
                     {t.due && <span className="text-[12px] text-[var(--color-text-tertiary)] w-[56px] text-right shrink-0">{t.due}</span>}
@@ -243,7 +243,7 @@ export function Notifications() {
           <Row key={n.id}>
             {n.unread ? <StatusDot color="indigo" size={7} /> : <span className="w-[7px]" />}
             <div className="min-w-0 flex-1">
-              <span className="text-[13px] w-medium">{n.title}</span>
+              <span className="text-[13px] w-medium" title={n.title}>{n.title}</span>
               <span className="text-[13px] text-[var(--color-text-tertiary)]"> — {n.detail}</span>
             </div>
             <Badge>{n.kind}</Badge>
@@ -258,10 +258,11 @@ export function Notifications() {
 // ---- Inbox 3-pane (styled after IMG_4785) ----------------------------------
 export function Inbox() {
   const [sel, setSel] = useState<InboxItem>(inbox[0])
+  const [mobileOpen, setMobileOpen] = useState(false)
   return (
-    <div className="h-full flex">
+    <div className="h-full flex flex-col md:flex-row">
       {/* list pane */}
-      <div className="w-[340px] xl:w-[360px] shrink-0 border-r border-[var(--color-hairline)] flex flex-col">
+      <div className={`${mobileOpen ? 'hidden md:flex' : 'flex'} w-full md:w-[340px] xl:w-[360px] shrink-0 border-r border-[var(--color-hairline)] flex-col`}>
         <div className="h-11 flex items-center px-4 border-b border-[var(--color-hairline)]">
           <span className="text-[14px] w-semibold">Inbox</span>
           <span className="ml-2 text-[12px] text-[var(--color-text-muted)] tabular">{inbox.filter((i) => i.unread).length} unread</span>
@@ -270,7 +271,7 @@ export function Inbox() {
           {inbox.map((it) => (
             <button
               key={it.id}
-              onClick={() => setSel(it)}
+              onClick={() => { setSel(it); setMobileOpen(true) }}
               className={`w-full text-left px-4 py-3 border-b border-[var(--color-hairline)] transition-colors ${
                 sel.id === it.id ? 'bg-[var(--color-level-2)]' : 'hover:bg-[var(--color-level-2)]'
               }`}
@@ -287,8 +288,9 @@ export function Inbox() {
       </div>
 
       {/* detail pane */}
-      <div className="flex-1 min-w-0 overflow-y-auto scroll-quiet">
+      <div className={`${mobileOpen ? 'flex' : 'hidden md:flex'} flex-1 min-w-0 overflow-y-auto scroll-quiet flex-col`}>
         <div className="h-11 flex items-center gap-2 px-5 border-b border-[var(--color-hairline)] sticky top-0 bg-[var(--color-canvas)] z-10">
+          <button onClick={() => setMobileOpen(false)} className="md:hidden grid place-items-center -ml-1.5 h-7 w-7 rounded-[6px] text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)]"><ArrowLeft size={16} /></button>
           <StatusDot color="blue" ring />
           <span className="text-[12px] tabular text-[var(--color-text-tertiary)]">{sel.ref}</span>
           <div className="ml-auto flex items-center gap-1">
@@ -296,7 +298,7 @@ export function Inbox() {
             <button className="grid place-items-center h-7 w-7 rounded-[6px] text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)]"><Clock size={15} /></button>
           </div>
         </div>
-        <div className="max-w-[720px] px-5 md:px-8 py-6">
+        <div className="max-w-[65ch] px-5 md:px-8 py-6">
           <h1 className="text-[20px] title mb-4 leading-snug">{sel.title}</h1>
           <div className="text-[15px] text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-line mb-6">{sel.body}</div>
 

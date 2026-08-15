@@ -90,7 +90,7 @@ export function CommandMenu({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search or run a command…"
-            className="flex-1 bg-transparent outline-none text-[14px] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]"
+            className="flex-1 bg-transparent outline-none text-base sm:text-[14px] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]"
           />
           <Kbd>Esc</Kbd>
         </div>

@@ -45,7 +45,7 @@ export function MobileShell({
       <button
         onClick={() => setQuick(true)}
         aria-label="Quick actions"
-        className="fixed right-4 bottom-[76px] z-30 grid place-items-center h-14 w-14 rounded-full bg-[var(--color-brand)] text-white shadow-stack active:brightness-110"
+        className="fixed right-4 bottom-[76px] z-30 grid place-items-center h-14 w-14 rounded-full bg-[var(--color-brand)] text-white shadow-stack transition-transform active:scale-[0.96] active:brightness-110"
       >
         <Plus size={24} />
       </button>

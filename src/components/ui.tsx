@@ -23,7 +23,7 @@ export function Button({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: 'sm' | 'md' }) {
   const base =
-    'inline-flex items-center gap-1.5 rounded-[8px] w-medium select-none transition-[background,color,box-shadow,filter] duration-150 disabled:opacity-40'
+    'inline-flex items-center gap-1.5 rounded-[8px] w-medium select-none transition-[background,color,box-shadow,filter,transform] duration-150 active:scale-[0.96] disabled:opacity-40'
   const sizes = size === 'sm' ? 'h-7 px-2.5 text-[12px]' : 'h-8 px-3 text-[13px]'
   const variants: Record<Variant, string> = {
     primary: 'bg-[var(--color-brand)] text-white hover:brightness-110',
@@ -46,7 +46,7 @@ export function IconButton({
 }: ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean }) {
   return (
     <button
-      className={`grid place-items-center h-8 w-8 rounded-[6px] text-[var(--color-text-tertiary)] transition-colors duration-150 hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)] ${
+      className={`grid place-items-center h-8 w-8 rounded-[6px] text-[var(--color-text-tertiary)] transition-[color,background-color,transform] duration-150 active:scale-[0.96] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)] ${
         active ? 'bg-[var(--color-surface-raised)] text-[var(--color-text-primary)]' : ''
       } ${className}`}
       {...props}

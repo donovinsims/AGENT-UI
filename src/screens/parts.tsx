@@ -66,12 +66,15 @@ export function FilterButton() {
   )
 }
 
-// A dense list-row shell
+// A dense list-row shell. Hover/cursor affordance only when the row is interactive.
 export function Row({ children, onClick, className = '' }: { children: ReactNode; onClick?: () => void; className?: string }) {
+  const interactive = Boolean(onClick)
   return (
     <div
       onClick={onClick}
-      className={`group flex items-center gap-3 h-[38px] px-4 md:px-5 border-b border-[var(--color-hairline)] hover:bg-[var(--color-level-2)] transition-colors duration-100 cursor-default ${className}`}
+      className={`group flex items-center gap-3 h-[38px] px-4 md:px-5 border-b border-[var(--color-hairline)] ${
+        interactive ? 'hover:bg-[var(--color-level-2)] transition-colors duration-100 cursor-pointer' : ''
+      } ${className}`}
     >
       {children}
     </div>
@@ -84,7 +87,7 @@ export function GroupHeader({ color, label, count }: { color?: ReactNode; label:
       {color}
       <span className="text-[13px] w-semibold">{label}</span>
       <span className="text-[12px] text-[var(--color-text-muted)] tabular">{count}</span>
-      <button className="ml-auto grid place-items-center h-6 w-6 rounded-[5px] text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 hover:bg-[var(--color-surface-raised)]">+</button>
+      <button className="ml-auto grid place-items-center h-6 w-6 rounded-[5px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-secondary)]">+</button>
     </div>
   )
 }
