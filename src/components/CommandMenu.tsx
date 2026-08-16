@@ -84,7 +84,7 @@ export function CommandMenu({
         role="dialog"
         aria-modal="true"
         aria-label="Command menu"
-        className="w-full max-w-[600px] rounded-[12px] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-stack overflow-hidden animate-menu"
+        className="w-full max-w-[600px] rounded-xl bg-popover border border-border shadow-sm overflow-hidden animate-menu"
         onMouseDown={(e) => e.stopPropagation()}
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown') { e.preventDefault(); setSel((s) => Math.min(s + 1, filtered.length - 1)) }
@@ -93,35 +93,35 @@ export function CommandMenu({
           else if (e.key === 'Escape') onClose()
         }}
       >
-        <div className="flex items-center gap-2.5 px-3.5 h-12 border-b border-[var(--color-hairline)]">
-          <Search size={16} className="text-[var(--color-text-tertiary)]" />
+        <div className="flex items-center gap-2.5 px-3.5 h-12 border-b border-border">
+          <Search size={16} className="text-muted-foreground" />
           <input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search or run a command…"
             aria-label="Search commands"
-            className="flex-1 bg-transparent outline-none text-base sm:text-[14px] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]"
+            className="flex-1 bg-transparent outline-none text-base sm:text-sm text-foreground placeholder:text-muted-foreground"
           />
           <Kbd>Esc</Kbd>
         </div>
         <div className="max-h-[52vh] overflow-auto scroll-quiet py-1.5">
           {filtered.length === 0 && (
-            <div className="px-4 py-8 text-center text-[13px] text-[var(--color-text-muted)]">No results</div>
+            <div className="px-4 py-8 text-center text-sm text-muted-foreground">No results</div>
           )}
           {filtered.map((c, i) => (
             <button
               key={c.id}
               onMouseEnter={() => setSel(i)}
               onClick={() => choose(c)}
-              className={`w-full flex items-center gap-3 px-3.5 h-9 text-left transition-colors duration-100 ${
-                i === sel ? 'bg-[var(--color-surface-raised)]' : ''
+              className={`w-full flex items-center gap-3 px-3.5 h-9 text-left transition-colors duration-100 text-foreground ${
+                i === sel ? 'bg-accent text-accent-foreground' : ''
               }`}
             >
-              <span className="text-[var(--color-text-tertiary)]">{c.icon}</span>
-              <span className="text-[13px] text-[var(--color-text-primary)] flex-1">{c.label}</span>
-              <span className="text-[11px] text-[var(--color-text-muted)]">{c.hint}</span>
-              {i === sel && <CornerDownLeft size={13} className="text-[var(--color-text-muted)]" />}
+              <span className="text-muted-foreground">{c.icon}</span>
+              <span className="text-sm flex-1">{c.label}</span>
+              <span className="text-xs text-muted-foreground">{c.hint}</span>
+              {i === sel && <CornerDownLeft size={13} className="text-muted-foreground" />}
             </button>
           ))}
         </div>

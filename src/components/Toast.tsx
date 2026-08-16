@@ -14,10 +14,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return <ToastContext.Provider value={{ notify }}>
     {children}
     <div className="fixed right-4 bottom-4 z-[60] flex w-[min(360px,calc(100vw-2rem))] flex-col gap-2" aria-live="polite" aria-atomic="true">
-      {toasts.map((toast) => <div key={toast.id} role="status" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2.5 shadow-stack text-[13px] text-[var(--color-text-primary)]">
+      {toasts.map((toast) => <div key={toast.id} role="status" className="flex items-center gap-2 rounded-md border border-border bg-popover px-3 py-2.5 shadow-xs text-sm text-foreground">
         <Check size={15} className="text-[var(--color-status-green)]" aria-hidden="true" />
         <span className="flex-1">{toast.message}</span>
-        <button onClick={() => setToasts((current) => current.filter((item) => item.id !== toast.id))} aria-label="Dismiss notification" className="grid h-7 w-7 place-items-center rounded-[6px] text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)]"><X size={14} /></button>
+        <button onClick={() => setToasts((current) => current.filter((item) => item.id !== toast.id))} aria-label="Dismiss notification" className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-accent"><X size={14} /></button>
       </div>)}
     </div>
   </ToastContext.Provider>

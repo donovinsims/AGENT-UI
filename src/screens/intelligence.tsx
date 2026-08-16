@@ -4,7 +4,7 @@ import {
   agents, agentById, agentRuns, approvals, automations, runnerStatus,
   type AutonomyLevel, type Agent,
 } from '../data/model'
-import { Panel, Button, Badge, StatusDot, Ring, SectionLabel } from '../components/ui'
+import { Panel, Button, IconButton, Badge, StatusDot, Ring, SectionLabel } from '../components/ui'
 import { Page, Row } from './parts'
 import { useToast } from '../components/Toast'
 
@@ -25,49 +25,58 @@ export function IntelligenceCenter() {
   return (
     <Page title="Intelligence Center">
       <div className="p-4 md:p-6 max-w-[1150px] space-y-4">
-        <Panel className="p-5" style={{ background: 'linear-gradient(180deg, rgba(94,106,210,.10), transparent)' }}>
-          <div className="flex items-center gap-2 mb-2 text-[var(--color-brand)]"><Sparkles size={16} /><SectionLabel className="!text-[var(--color-brand)]">Executive briefing</SectionLabel></div>
-          <p className="text-[15px] leading-[1.6] text-[var(--color-text-secondary)] max-w-2xl">
-            Agents completed <span className="text-[var(--color-text-primary)] w-medium">{runs} runs</span> today across sales, delivery and operations. Three actions await your approval, one deal is drifting, and the Mac Runner is offline — local-only automations are paused until it reconnects.
+        {/* Executive briefing — flat section, no hero card */}
+        <div>
+          <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+            <Sparkles size={15} />
+            <SectionLabel>Executive briefing</SectionLabel>
+          </div>
+          <p className="text-sm leading-[1.6] text-muted-foreground max-w-2xl">
+            Agents completed <span className="text-foreground w-medium">{runs} runs</span> today across sales, delivery and operations. Three actions await your approval, one deal is drifting, and the Mac Runner is offline — local-only automations are paused until it reconnects.
           </p>
-        </Panel>
+        </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {/* Stat row — flat sections, no giant cards */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
           {[
             { label: 'Active agents', value: `${active}/${agents.length}`, icon: Cpu },
             { label: 'Runs today', value: runs, icon: ActivityIcon },
             { label: 'Awaiting approval', value: approvals.length, icon: ShieldCheck },
             { label: 'Avg success', value: '96%', icon: Sparkles },
           ].map((k) => (
-            <Panel key={k.label} className="p-3.5">
-              <k.icon size={15} className="text-[var(--color-text-tertiary)] mb-2" />
-              <div className="text-[22px] w-semibold tabular leading-none">{k.value}</div>
-              <div className="text-[12px] text-[var(--color-text-muted)] mt-1.5">{k.label}</div>
-            </Panel>
+            <div key={k.label} className="flex items-center gap-1.5 text-sm">
+              <k.icon size={14} className="text-muted-foreground" />
+              <span className="tabular w-semibold">{k.value}</span>
+              <span className="text-xs text-muted-foreground">{k.label}</span>
+            </div>
           ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Panel>
-            <div className="flex items-center h-11 px-4 border-b border-[var(--color-hairline)]"><span className="text-[13px] w-semibold">Recent runs</span></div>
+            <div className="flex items-center h-10 px-4 border-b border-border">
+              <span className="text-xs w-semibold uppercase tracking-[0.06em] text-muted-foreground">Recent runs</span>
+            </div>
             {agentRuns.slice(0, 5).map((r) => (
-              <div key={r.id} className="flex items-center gap-3 h-[42px] px-4 border-b border-[var(--color-hairline)] last:border-0">
+              <Row key={r.id} className="last:border-0">
                 <StatusDot color={runColor[r.status]} ring={r.status === 'running'} />
-                <span className="text-[16px]">{agentById(r.agentId).emoji}</span>
-                <span className="text-[13px] truncate flex-1">{r.task}</span>
+                <span className="text-sm shrink-0">{agentById(r.agentId).emoji}</span>
+                <span className="text-sm truncate flex-1 min-w-0" title={r.task}>{r.task}</span>
                 {r.fellBack && <Badge color="orange">fell back</Badge>}
-                <span className="text-[12px] text-[var(--color-text-muted)] tabular">{r.when}</span>
-              </div>
+                <span className="text-xs text-muted-foreground tabular shrink-0">{r.when}</span>
+              </Row>
             ))}
           </Panel>
           <Panel>
-            <div className="flex items-center h-11 px-4 border-b border-[var(--color-hairline)]"><span className="text-[13px] w-semibold">Model & runner health</span></div>
+            <div className="flex items-center h-10 px-4 border-b border-border">
+              <span className="text-xs w-semibold uppercase tracking-[0.06em] text-muted-foreground">Model &amp; runner health</span>
+            </div>
             {runnerStatus.map((r) => (
-              <div key={r.name} className="flex items-center gap-3 h-[42px] px-4 border-b border-[var(--color-hairline)] last:border-0">
+              <Row key={r.name} className="last:border-0">
                 <StatusDot color={r.color} />
-                <span className="text-[13px] flex-1">{r.name}</span>
-                <span className="text-[12px] text-[var(--color-text-muted)]">{r.status}</span>
-              </div>
+                <span className="text-sm truncate flex-1 min-w-0" title={r.name}>{r.name}</span>
+                <span className="text-xs text-muted-foreground shrink-0">{r.status}</span>
+              </Row>
             ))}
           </Panel>
         </div>
@@ -82,28 +91,23 @@ export function Agents() {
   if (openId) return <AgentDetail agent={agentById(openId)} onBack={() => setOpenId(null)} />
   return (
     <Page title="Agents" count={agents.length} actions={<Button size="sm" variant="primary"><Plus size={14} /> New agent</Button>}>
-      <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 max-w-[1200px]">
+      <div className="max-w-[1200px]">
         {agents.map((a) => (
-          <Panel key={a.id} className="p-4 cursor-pointer hover:bg-[var(--color-level-2)] transition-colors" >
-            <button onClick={() => setOpenId(a.id)} className="w-full text-left">
-              <div className="flex items-start gap-3 mb-3">
-                <span className="grid place-items-center h-10 w-10 rounded-[10px] bg-[var(--color-level-3)] text-[18px]">{a.emoji}</span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2"><span className="text-[14px] w-medium truncate">{a.name}</span></div>
-                  <div className="text-[12px] text-[var(--color-text-muted)] line-clamp-2 mt-0.5">{a.purpose}</div>
-                </div>
-                <StatusDot color={a.status === 'active' ? 'green' : a.status === 'paused' ? 'gray' : 'yellow'} ring={a.status !== 'active'} />
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <Badge color="indigo">{a.autonomy}</Badge>
-                <Badge>{a.model}</Badge>
-              </div>
-              <div className="flex items-center justify-between mt-3 pt-3 border-t border-[var(--color-hairline)] text-[12px] text-[var(--color-text-muted)]">
-                <span>{a.runsToday} runs today</span>
-                <span className="flex items-center gap-1.5"><Ring value={a.successRate} size={18} color="var(--color-status-green)" /> {a.successRate}%</span>
-              </div>
-            </button>
-          </Panel>
+          <Row key={a.id} onClick={() => setOpenId(a.id)}>
+            <span className="grid place-items-center h-7 w-7 rounded-md bg-muted text-sm shrink-0">{a.emoji}</span>
+            <span className="text-sm w-semibold truncate flex-1 min-w-0" title={a.name}>{a.name}</span>
+            <span className="inline-flex items-center gap-1.5 h-6 px-2 rounded-md border border-border bg-muted text-xs w-medium text-muted-foreground shrink-0">
+              <StatusDot color={a.status === 'active' ? 'green' : a.status === 'paused' ? 'gray' : 'yellow'} size={6} ring={a.status !== 'active'} />
+              {a.status === 'active' ? 'Active' : a.status === 'paused' ? 'Paused' : 'Draft'}
+            </span>
+            <Badge color="indigo" className="hidden md:inline-flex">{a.autonomy}</Badge>
+            <Badge className="hidden lg:inline-flex">{a.model}</Badge>
+            <span className="text-xs text-muted-foreground tabular hidden md:block shrink-0">{a.runsToday} runs today</span>
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0 hidden sm:flex">
+              <Ring value={a.successRate} size={16} color="var(--color-status-green)" />
+              {a.successRate}%
+            </span>
+          </Row>
         ))}
       </div>
     </Page>
@@ -116,27 +120,34 @@ function AgentDetail({ agent, onBack }: { agent: Agent; onBack: () => void }) {
   const { notify } = useToast()
   return (
     <div className="h-full flex flex-col">
-      <div className="h-11 shrink-0 flex items-center gap-2 px-4 md:px-5 border-b border-[var(--color-hairline)]">
-        <button onClick={onBack} className="grid place-items-center h-7 w-7 rounded-[6px] text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)]"><ArrowLeft size={16} /></button>
-        <span className="text-[16px]">{agent.emoji}</span>
-        <span className="text-[14px] w-semibold">{agent.name}</span>
+      <div className="h-11 shrink-0 flex items-center gap-2 px-4 md:px-5 border-b border-border">
+        <IconButton aria-label="Back" onClick={onBack}><ArrowLeft size={16} /></IconButton>
+        <span className="text-sm">{agent.emoji}</span>
+        <span className="text-sm w-semibold">{agent.name}</span>
         <div className="ml-auto flex items-center gap-1.5">
           <Button size="sm" variant="secondary">{agent.status === 'active' ? <><Pause size={13} /> Pause</> : <><Play size={13} /> Activate</>}</Button>
           <Button size="sm" variant="primary"><Play size={13} /> Run now</Button>
         </div>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto scroll-quiet grid grid-cols-1 lg:grid-cols-[1fr_300px]">
-        <div className="p-4 md:p-6 space-y-4 border-r border-[var(--color-hairline)]">
-          <p className="text-[15px] leading-[1.6] text-[var(--color-text-secondary)] max-w-2xl">{agent.purpose}</p>
+        <div className="p-4 md:p-6 space-y-4 border-r border-border">
+          <p className="text-sm leading-[1.6] text-muted-foreground max-w-2xl">{agent.purpose}</p>
 
           <div>
             <SectionLabel className="mb-2">Autonomy level</SectionLabel>
-            <div className="flex items-center gap-0.5 rounded-[8px] bg-[var(--color-level-2)] p-0.5 w-fit">
+            <div className="flex items-center gap-0.5 rounded-md bg-muted p-0.5 w-fit">
               {AUTONOMY.map((l) => (
-                <button key={l.id} onClick={() => { setAutonomy(l.id); notify(`${agent.name} is set to ${l.label.toLowerCase()} for this preview.`) }} aria-pressed={l.id === autonomy} className={`h-7 px-3 grid place-items-center rounded-[6px] text-[12px] w-medium ${l.id === autonomy ? 'bg-[var(--color-brand)] text-white' : 'text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)]'}`}>{l.label}</button>
+                <button
+                  key={l.id}
+                  onClick={() => { setAutonomy(l.id); notify(`${agent.name} is set to ${l.label.toLowerCase()} for this preview.`) }}
+                  aria-pressed={l.id === autonomy}
+                  className={`h-7 px-3 grid place-items-center rounded-md text-xs w-medium transition-colors duration-100 ${l.id === autonomy ? 'bg-primary text-primary-foreground shadow-xs' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}`}
+                >
+                  {l.label}
+                </button>
               ))}
             </div>
-            <p className="text-[12px] text-[var(--color-text-muted)] mt-2">Higher levels can act without approval within granted scopes. Sensitive scopes always require confirmation.</p>
+            <p className="text-xs text-muted-foreground mt-2">Higher levels can act without approval within granted scopes. Sensitive scopes always require confirmation.</p>
           </div>
 
           <div>
@@ -149,21 +160,21 @@ function AgentDetail({ agent, onBack }: { agent: Agent; onBack: () => void }) {
           <div>
             <SectionLabel className="mb-2">Run history</SectionLabel>
             <Panel>
-              {runs.length === 0 && <div className="px-4 py-6 text-[13px] text-[var(--color-text-muted)]">No runs yet.</div>}
+              {runs.length === 0 && <div className="px-4 py-6 text-sm text-muted-foreground">No runs yet.</div>}
               {runs.map((r) => (
-                <div key={r.id} className="flex items-center gap-3 h-[42px] px-4 border-b border-[var(--color-hairline)] last:border-0">
+                <Row key={r.id} className="last:border-0">
                   <StatusDot color={runColor[r.status]} ring={r.status === 'running'} />
-                  <span className="text-[13px] truncate flex-1">{r.task}</span>
-                  <span className="text-[12px] text-[var(--color-text-muted)] tabular hidden md:block">{r.tokens}</span>
-                  <span className="text-[12px] text-[var(--color-text-muted)] tabular w-[52px] text-right">{r.duration}</span>
-                  <span className="text-[12px] text-[var(--color-text-muted)] w-[52px] text-right">{r.when}</span>
-                </div>
+                  <span className="text-sm truncate flex-1 min-w-0" title={r.task}>{r.task}</span>
+                  <span className="text-xs text-muted-foreground tabular hidden md:block shrink-0">{r.tokens}</span>
+                  <span className="text-xs text-muted-foreground tabular w-[52px] text-right shrink-0">{r.duration}</span>
+                  <span className="text-xs text-muted-foreground w-[52px] text-right shrink-0">{r.when}</span>
+                </Row>
               ))}
             </Panel>
           </div>
         </div>
 
-        <aside className="p-4 md:p-5 space-y-4 bg-[var(--color-level-1)]">
+        <aside className="p-4 md:p-5 space-y-4 bg-muted/40">
           {[
             { k: 'Status', v: agent.status },
             { k: 'Primary model', v: agent.model },
@@ -172,9 +183,9 @@ function AgentDetail({ agent, onBack }: { agent: Agent; onBack: () => void }) {
             { k: 'Success rate', v: `${agent.successRate}%` },
             { k: 'Last run', v: agent.lastRun },
           ].map((p) => (
-            <div key={p.k} className="flex items-center justify-between">
-              <span className="text-[12px] text-[var(--color-text-muted)]">{p.k}</span>
-              <span className="text-[13px] w-medium">{p.v}</span>
+            <div key={p.k} className="flex items-center justify-between gap-3">
+              <span className="text-xs text-muted-foreground">{p.k}</span>
+              <span className="text-sm w-medium text-right">{p.v}</span>
             </div>
           ))}
         </aside>
@@ -189,27 +200,24 @@ export function Approvals() {
   const { notify } = useToast()
   return (
     <Page title="Approvals" count={approvals.length}>
-      <div className="p-4 md:p-6 space-y-3 max-w-[760px]">
+      <div className="max-w-[760px]">
         {approvals.filter((approval) => pending.includes(approval.id)).map((a) => (
-          <Panel key={a.id} className="p-4">
-            <div className="flex items-start gap-3">
-              <span className="mt-0.5"><StatusDot color={a.risk} /></span>
-              <div className="min-w-0 flex-1">
-                <div className="text-[14px] w-medium">{a.action}</div>
-                <div className="text-[13px] text-[var(--color-text-secondary)] mt-0.5">{a.detail}</div>
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <Badge color="indigo">{a.agent}</Badge>
-                  <Badge>{a.scope}</Badge>
-                  <span className="text-[12px] text-[var(--color-text-muted)]">{a.requestedAt}</span>
-                </div>
-              </div>
+          <Row key={a.id} className="!h-[56px]">
+            <StatusDot color={a.risk} />
+            <div className="min-w-0 flex-1">
+              <div className="text-sm w-medium truncate" title={a.action}>{a.action}</div>
+              <div className="text-xs text-muted-foreground truncate" title={a.detail}>{a.detail}</div>
             </div>
-            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[var(--color-hairline)]">
+            <div className="hidden md:flex items-center gap-2 shrink-0">
+              <Badge color="indigo">{a.agent}</Badge>
+              <Badge>{a.scope}</Badge>
+              <span className="text-xs text-muted-foreground">{a.requestedAt}</span>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
               <Button size="sm" variant="primary" onClick={() => { setPending((items) => items.filter((id) => id !== a.id)); notify('Approved locally. This preview did not run the action.') }}><Check size={14} /> Approve</Button>
               <Button size="sm" variant="secondary" onClick={() => { setPending((items) => items.filter((id) => id !== a.id)); notify('Rejected locally. This preview did not change an approval.') }}><X size={14} /> Reject</Button>
-              <Button size="sm" variant="ghost" className="ml-auto">View details</Button>
             </div>
-          </Panel>
+          </Row>
         ))}
       </div>
     </Page>
@@ -224,21 +232,19 @@ export function Automations() {
     <Page title="Automations" count={automations.length} actions={<Button size="sm" variant="primary"><Plus size={14} /> New automation</Button>}>
       <div>
         {automations.map((a) => (
-          <Row key={a.id} className="!h-[54px]">
+          <Row key={a.id}>
             <button
               onClick={() => { setState((s) => ({ ...s, [a.id]: !s[a.id] })); notify(`${a.name} updated for this preview only.`) }}
               aria-label={`${state[a.id] ? 'Pause' : 'Enable'} ${a.name}`}
               aria-pressed={state[a.id]}
-              className={`relative h-[18px] w-[30px] rounded-full transition-colors shrink-0 ${state[a.id] ? 'bg-[var(--color-brand)]' : 'bg-[var(--color-surface-raised)]'}`}
+              className={`relative h-[18px] w-[30px] rounded-full transition-colors duration-100 shrink-0 ${state[a.id] ? 'bg-primary' : 'bg-input'}`}
             >
-              <span className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-white transition-[left] ${state[a.id] ? 'left-[14px]' : 'left-[2px]'}`} />
+              <span className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-xs transition-[left] duration-100 ${state[a.id] ? 'left-[14px]' : 'left-[2px]'}`} />
             </button>
-            <div className="min-w-0 flex-1">
-              <div className="text-[13px] w-medium truncate">{a.name}</div>
-              <div className="text-[12px] text-[var(--color-text-muted)] truncate">When {a.trigger} → {a.action}</div>
-            </div>
-            <span className="text-[12px] text-[var(--color-text-muted)] tabular hidden md:block">{a.runs} runs</span>
-            <span className="text-[12px] text-[var(--color-text-muted)] w-[56px] text-right">{a.lastRun}</span>
+            <span className="text-sm w-medium truncate flex-1 min-w-0" title={a.name}>{a.name}</span>
+            <span className="text-xs text-muted-foreground truncate hidden xl:block max-w-[280px] shrink-0" title={`When ${a.trigger} → ${a.action}`}>When {a.trigger} → {a.action}</span>
+            <span className="text-xs text-muted-foreground tabular hidden md:block shrink-0">{a.runs} runs</span>
+            <span className="text-xs text-muted-foreground w-[56px] text-right shrink-0">{a.lastRun}</span>
           </Row>
         ))}
       </div>
@@ -260,26 +266,24 @@ export function ModelRouting() {
       <div className="p-4 md:p-6 space-y-4 max-w-[1000px]">
         <Panel className="p-4">
           <SectionLabel className="mb-3">Routing policy</SectionLabel>
-          <div className="flex items-center gap-2 flex-wrap text-[13px] text-[var(--color-text-secondary)]">
-            <Badge color="green">Codex (local)</Badge><span className="text-[var(--color-text-muted)]">→ if unavailable →</span>
-            <Badge color="blue">business-backup</Badge><span className="text-[var(--color-text-muted)]">→ then →</span>
+          <div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground">
+            <Badge color="green">Codex (local)</Badge><span className="text-muted-foreground">→ if unavailable →</span>
+            <Badge color="blue">business-backup</Badge><span className="text-muted-foreground">→ then →</span>
             <Badge color="teal">coding-backup</Badge>
           </div>
-          <p className="text-[12px] text-[var(--color-text-muted)] mt-3">Runs that fall back are flagged in run history. Sensitive scopes never route to external lanes without approval.</p>
+          <p className="text-xs text-muted-foreground mt-3">Runs that fall back are flagged in run history. Sensitive scopes never route to external lanes without approval.</p>
         </Panel>
 
         <div>
-          <SectionLabel className="mb-2 px-1">Lanes & runners</SectionLabel>
+          <SectionLabel className="mb-2 px-1">Lanes &amp; runners</SectionLabel>
           <Panel>
             {lanes.map((l) => (
-              <div key={l.name} className="flex items-center gap-3 h-[52px] px-4 border-b border-[var(--color-hairline)] last:border-0">
+              <Row key={l.name} className="last:border-0">
                 <StatusDot color={l.color} ring={l.color === 'red'} />
-                <div className="min-w-0 flex-1">
-                  <div className="text-[13px] w-medium">{l.name}</div>
-                  <div className="text-[12px] text-[var(--color-text-muted)]">{l.role}</div>
-                </div>
-                <span className={`text-[12px] w-medium ${l.color === 'red' ? 'text-[var(--color-status-red)]' : 'text-[var(--color-text-tertiary)]'}`}>{l.status}</span>
-              </div>
+                <span className="text-sm w-medium truncate flex-1 min-w-0" title={l.name}>{l.name}</span>
+                <span className="text-xs text-muted-foreground truncate hidden lg:block max-w-[260px] shrink-0" title={l.role}>{l.role}</span>
+                <span className={`text-xs w-medium shrink-0 ${l.color === 'red' ? 'text-[var(--color-status-red)]' : 'text-muted-foreground'}`}>{l.status}</span>
+              </Row>
             ))}
           </Panel>
         </div>

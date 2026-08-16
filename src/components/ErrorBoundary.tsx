@@ -6,7 +6,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: 
   static getDerivedStateFromError() { return { failed: true } }
   componentDidCatch(_error: Error, _info: ErrorInfo) {}
   render() {
-    if (this.state.failed) return <div className="h-full grid place-items-center p-6"><Panel className="max-w-md p-5 text-center"><h1 className="text-[16px] title">Unable to load this area</h1><p className="mt-2 text-[13px] text-[var(--color-text-secondary)]">Try again. Your preview data has not been changed.</p><Button className="mt-4" onClick={() => this.setState({ failed: false })}>Try again</Button></Panel></div>
+    if (this.state.failed) return <div className="h-full grid place-items-center p-6"><Panel className="max-w-md p-5 text-center"><h1 className="text-sm title">Unable to load this area</h1><p className="mt-2 text-sm text-muted-foreground">Try again. Your preview data has not been changed.</p><Button className="mt-4" onClick={() => this.setState({ failed: false })}>Try again</Button></Panel></div>
     return this.props.children
   }
 }

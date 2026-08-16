@@ -1,6 +1,6 @@
 import { type ReactNode, useState } from 'react'
 import { SlidersHorizontal, ListFilter, ChevronDown } from 'lucide-react'
-import { Button } from '../components/ui'
+import { Button, IconButton } from '../components/ui'
 
 // Page wrapper: sticky toolbar header + scrollable body.
 export function Page({
@@ -21,21 +21,23 @@ export function Page({
   const [view, setView] = useState(views?.[0])
   return (
     <div className="h-full flex flex-col">
-      <div className="h-11 shrink-0 flex items-center gap-2 px-4 md:px-5 border-b border-[var(--color-hairline)]">
-        <button className="flex items-center gap-1.5 text-[14px] w-semibold">
+      <div className="h-10 shrink-0 flex items-center gap-2 px-4 md:px-6 border-b border-border">
+        <button className="flex items-center gap-1.5 text-sm w-semibold">
           {title}
-          {count != null && <span className="text-[var(--color-text-muted)] w-medium tabular">{count}</span>}
-          <ChevronDown size={13} className="text-[var(--color-text-tertiary)]" />
+          {count != null && <span className="text-muted-foreground w-medium tabular">{count}</span>}
+          <ChevronDown size={13} className="text-muted-foreground" />
         </button>
         {views && (
-          <div className="ml-2 flex items-center gap-0.5 rounded-[8px] bg-[var(--color-level-2)] p-0.5">
+          <div className="ml-2 flex items-center gap-1">
             {views.map((v) => (
               <button
                 key={v}
                 onClick={() => setView(v)}
                 data-view={v}
-                className={`h-6 px-2.5 rounded-[6px] text-[12px] w-medium transition-colors ${
-                  view === v ? 'bg-[var(--color-surface-raised)] text-[var(--color-text-primary)]' : 'text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]'
+                className={`h-7 px-2.5 rounded-md text-xs w-medium transition-colors duration-100 ${
+                  view === v
+                    ? 'bg-accent text-foreground'
+                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                 }`}
               >
                 {v}
@@ -45,8 +47,8 @@ export function Page({
         )}
         <div className="ml-auto flex items-center gap-1">
           {actions}
-          <button aria-label="Filter view" className="grid place-items-center h-7 w-7 rounded-[6px] text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)]"><ListFilter size={15} /></button>
-          <button aria-label="View settings" className="grid place-items-center h-7 w-7 rounded-[6px] text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)]"><SlidersHorizontal size={15} /></button>
+          <IconButton aria-label="Filter view"><ListFilter size={15} /></IconButton>
+          <IconButton aria-label="View settings"><SlidersHorizontal size={15} /></IconButton>
         </div>
       </div>
       {/* provide selected view to children via data attr on wrapper */}
@@ -60,13 +62,14 @@ export function Page({
 // Simpler filter chip button
 export function FilterButton() {
   return (
-    <Button variant="ghost" size="sm" className="text-[var(--color-text-tertiary)]">
+    <Button variant="ghost" size="sm" className="text-muted-foreground">
       <ListFilter size={14} /> Filter
     </Button>
   )
 }
 
 // A dense list-row shell. Hover/cursor affordance only when the row is interactive.
+// Circle operational rows: 44px, 24px horizontal padding.
 export function Row({ children, onClick, className = '' }: { children: ReactNode; onClick?: () => void; className?: string }) {
   const interactive = Boolean(onClick)
   return (
@@ -75,8 +78,8 @@ export function Row({ children, onClick, className = '' }: { children: ReactNode
       role={interactive ? 'button' : undefined}
       tabIndex={interactive ? 0 : undefined}
       onKeyDown={interactive ? (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onClick?.() } } : undefined}
-      className={`group flex items-center gap-3 h-[38px] px-4 md:px-5 border-b border-[var(--color-hairline)] ${
-        interactive ? 'hover:bg-[var(--color-level-2)] transition-colors duration-100 cursor-pointer' : ''
+      className={`group flex items-center gap-3 h-11 px-4 md:px-6 border-b border-border ${
+        interactive ? 'hover:bg-muted/50 transition-colors duration-100 cursor-pointer' : ''
       } ${className}`}
     >
       {children}
@@ -86,11 +89,11 @@ export function Row({ children, onClick, className = '' }: { children: ReactNode
 
 export function GroupHeader({ color, label, count }: { color?: ReactNode; label: string; count: number }) {
   return (
-    <div className="flex items-center gap-2 h-9 px-4 md:px-5 bg-[var(--color-level-1)] border-b border-[var(--color-hairline)] sticky top-0 z-10">
+    <div className="flex items-center gap-2 h-9 px-4 md:px-6 bg-muted/30 border-b border-border sticky top-0 z-10">
       {color}
       <span className="text-[13px] w-semibold">{label}</span>
-      <span className="text-[12px] text-[var(--color-text-muted)] tabular">{count}</span>
-      <button className="ml-auto grid place-items-center h-6 w-6 rounded-[5px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-secondary)]">+</button>
+      <span className="text-xs text-muted-foreground tabular">{count}</span>
+      <button className="ml-auto grid place-items-center h-6 w-6 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground">+</button>
     </div>
   )
 }

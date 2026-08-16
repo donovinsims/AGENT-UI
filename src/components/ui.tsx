@@ -1,7 +1,7 @@
 import { type ReactNode, type ButtonHTMLAttributes, type CSSProperties } from 'react'
 import type { StatusColor, Priority } from '../data/model'
 
-// ---- status color map -------------------------------------------------------
+// ---- status color map (product semantics preserved) -----------------------
 export const STATUS_HEX: Record<StatusColor, string> = {
   blue: 'var(--color-status-blue)',
   green: 'var(--color-status-green)',
@@ -9,30 +9,41 @@ export const STATUS_HEX: Record<StatusColor, string> = {
   orange: 'var(--color-status-orange)',
   yellow: 'var(--color-status-yellow)',
   teal: 'var(--color-status-teal)',
-  gray: 'var(--color-text-muted)',
-  indigo: 'var(--color-brand)',
+  gray: 'var(--muted-foreground)',
+  indigo: 'var(--sidebar-primary)',
 }
 
-// ---- Button -----------------------------------------------------------------
-type Variant = 'primary' | 'secondary' | 'ghost'
+// ---- Button ---------------------------------------------------------------
+// Circle system: 14px / 500, radius 8px, 16px icons, 3px focus ring.
+// Sizes: xxs 24 / xs 28 / sm 32 / default 36 / lg 40 / icon 36.
+type Variant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'destructive'
+type Size = 'xxs' | 'xs' | 'sm' | 'md' | 'lg' | 'icon'
 export function Button({
   variant = 'secondary',
   children,
   className = '',
   size = 'md',
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: 'sm' | 'md' }) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: Size }) {
   const base =
-    'inline-flex items-center gap-1.5 rounded-[8px] w-medium select-none transition-[background,color,box-shadow,filter,transform] duration-150 active:scale-[0.96] disabled:opacity-40'
-  const sizes = size === 'sm' ? 'h-7 px-2.5 text-[12px]' : 'h-8 px-3 text-[13px]'
+    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium select-none transition-[color,box-shadow,background-color,transform] duration-100 active:scale-[0.96] disabled:opacity-50 focus-visible:ring-[3px] focus-visible:ring-ring/50'
+  const sizes: Record<Size, string> = {
+    xxs: 'h-6 gap-1.5 px-2.5',
+    xs: 'h-7 gap-1.5 px-2.5',
+    sm: 'h-8 gap-1.5 px-3',
+    md: 'h-9 px-4',
+    lg: 'h-10 px-6',
+    icon: 'h-9 w-9',
+  }
   const variants: Record<Variant, string> = {
-    primary: 'bg-[var(--color-brand)] text-white hover:brightness-110',
-    secondary:
-      'bg-[var(--color-surface)] text-[var(--color-text-primary)] border border-[var(--color-border-input)] hover:bg-[var(--color-surface-raised)]',
-    ghost: 'text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]',
+    primary: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+    secondary: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
+    ghost: 'hover:bg-accent hover:text-accent-foreground',
+    outline: 'border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground',
+    destructive: 'bg-destructive text-white shadow-xs hover:bg-destructive/90',
   }
   return (
-    <button className={`${base} ${sizes} ${variants[variant]} ${className}`} {...props}>
+    <button className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...props}>
       {children}
     </button>
   )
@@ -46,8 +57,8 @@ export function IconButton({
 }: ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean }) {
   return (
     <button
-      className={`grid place-items-center h-8 w-8 rounded-[6px] text-[var(--color-text-tertiary)] transition-[color,background-color,transform] duration-150 active:scale-[0.96] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)] ${
-        active ? 'bg-[var(--color-surface-raised)] text-[var(--color-text-primary)]' : ''
+      className={`grid place-items-center h-8 w-8 rounded-md text-muted-foreground transition-[color,background-color,transform] duration-100 active:scale-[0.96] hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+        active ? 'bg-accent text-accent-foreground' : ''
       } ${className}`}
       {...props}
     >
@@ -75,34 +86,25 @@ export function StatusDot({ color, size = 8, ring }: { color: StatusColor; size?
   )
 }
 
-export function PriorityIcon({ priority }: { priority: Priority }) {
+// Circle-style priority bars: 16px footprint, restrained opacity, compact bars.
+export function PriorityIcon({ priority, className = '' }: { priority: Priority; className?: string }) {
   const bars = { none: 0, low: 1, medium: 2, high: 3, urgent: 3 }[priority]
+  const bar = (on: boolean, h: number) => (
+    <rect x={1.5 + (h - 3)} y={h === 3 ? 2 : 5} width="3" height={h === 3 ? 12 : 9} rx="1" fill="currentColor" opacity={on ? 1 : 0.4} />
+  )
   if (priority === 'urgent') {
     return (
-      <span className="grid place-items-center h-3.5 w-3.5 rounded-[3px]" style={{ background: 'var(--color-status-orange)' }}>
-        <span className="text-[9px] leading-none text-white w-bold">!</span>
-      </span>
-    )
-  }
-  if (priority === 'none') {
-    return (
-      <span className="inline-flex items-end gap-[1.5px] h-3.5" title="No priority">
-        {[3, 5, 7].map((h) => (
-          <span key={h} className="w-[2px] rounded-[1px] bg-[var(--color-text-muted)] opacity-40" style={{ height: h }} />
-        ))}
-      </span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className={className} aria-label="Urgent priority" role="img" focusable="false">
+        <path d="M3 1C1.91067 1 1 1.91067 1 3V13C1 14.0893 1.91067 15 3 15H13C14.0893 15 15 14.0893 15 13V3C15 1.91067 14.0893 1 13 1H3ZM7 4L9 4L8.75391 8.99836H7.25L7 4ZM9 11C9 11.5523 8.55228 12 8 12C7.44772 12 7 11.5523 7 11C7 10.4477 7.44772 10 8 10C8.55228 10 9 10.4477 9 11Z" />
+      </svg>
     )
   }
   return (
-    <span className="inline-flex items-end gap-[1.5px] h-3.5" title={`${priority} priority`}>
-      {[3, 5, 7].map((h, i) => (
-        <span
-          key={h}
-          className="w-[2px] rounded-[1px]"
-          style={{ height: h, background: i < bars ? 'var(--color-text-secondary)' : 'var(--color-text-muted)', opacity: i < bars ? 1 : 0.4 }}
-        />
-      ))}
-    </span>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className={className} aria-label={`${priority} priority`} role="img" focusable="false">
+      {bar(bars > 2, 3)}
+      {bar(bars > 1, 7)}
+      {bar(bars > 0, 11)}
+    </svg>
   )
 }
 
@@ -123,7 +125,7 @@ export function Avatar({ name, color, initials, size = 20 }: { name?: string; co
 export function Badge({ children, color, className = '' }: { children: ReactNode; color?: StatusColor; className?: string }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 h-[22px] px-2 rounded-[6px] text-[11px] w-medium border border-[var(--color-border-strong)] text-[var(--color-text-secondary)] whitespace-nowrap ${className}`}
+      className={`inline-flex items-center gap-1 rounded-md border border-border px-2.5 h-6 text-xs font-medium text-foreground whitespace-nowrap w-fit shrink-0 ${className}`}
     >
       {color && <StatusDot color={color} size={6} />}
       {children}
@@ -132,10 +134,12 @@ export function Badge({ children, color, className = '' }: { children: ReactNode
 }
 
 // ---- Panel / card -----------------------------------------------------------
+// Circle card: 14px radius, 1px border, card surface, subtle shadow.
+// Used only for actual grouped content — not for tables/CRM lists.
 export function Panel({ children, className = '', style }: { children: ReactNode; className?: string; style?: CSSProperties }) {
   return (
     <div
-      className={`rounded-[12px] border border-[var(--color-hairline)] bg-[var(--color-level-1)] ${className}`}
+      className={`rounded-xl border border-border bg-card text-card-foreground shadow-xs ${className}`}
       style={style}
     >
       {children}
@@ -145,7 +149,7 @@ export function Panel({ children, className = '', style }: { children: ReactNode
 
 export function SectionLabel({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`text-[11px] w-medium uppercase tracking-[0.06em] text-[var(--color-text-muted)] ${className}`}>
+    <div className={`text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground ${className}`}>
       {children}
     </div>
   )
@@ -155,20 +159,20 @@ export function SectionLabel({ children, className = '' }: { children: ReactNode
 export function EmptyState({ icon, title, hint }: { icon?: ReactNode; title: string; hint?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center gap-2">
-      {icon && <div className="text-[var(--color-text-muted)]">{icon}</div>}
-      <div className="text-[14px] text-[var(--color-text-secondary)] w-medium">{title}</div>
-      {hint && <div className="text-[13px] text-[var(--color-text-muted)] max-w-xs">{hint}</div>}
+      {icon && <div className="text-muted-foreground">{icon}</div>}
+      <div className="text-sm text-foreground w-medium">{title}</div>
+      {hint && <div className="text-xs text-muted-foreground max-w-xs">{hint}</div>}
     </div>
   )
 }
 
 // ---- Progress ring ----------------------------------------------------------
-export function Ring({ value, size = 30, color = 'var(--color-brand)' }: { value: number; size?: number; color?: string }) {
+export function Ring({ value, size = 30, color = 'var(--sidebar-primary)' }: { value: number; size?: number; color?: string }) {
   const r = size / 2 - 3
   const c = 2 * Math.PI * r
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0">
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-surface-raised)" strokeWidth="3" />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--muted)" strokeWidth="3" />
       <circle
         cx={size / 2}
         cy={size / 2}
