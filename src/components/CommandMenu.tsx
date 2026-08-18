@@ -1,9 +1,20 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Search, CornerDownLeft, Plus, Send, Bot, CheckSquare, FileText, Moon, Sun } from 'lucide-react'
-import { NAV } from '../lib/nav'
-import { Kbd } from './ui'
-import { useTheme } from '../theme/ThemeProvider'
-import { useFocusTrap } from './useFocusTrap'
+import { useEffect, useMemo, useRef, useState } from "react"
+import {
+  Search,
+  CornerDownLeft,
+  Plus,
+  Send,
+  Bot,
+  CheckSquare,
+  FileText,
+  Moon,
+  Sun,
+} from "lucide-react"
+import { NAV } from "../lib/nav"
+import { Kbd } from "./ui"
+import { useTheme } from "../theme/ThemeProvider"
+import { useFocusTrap } from "./useFocusTrap"
+import type { CreateKind } from "../store/create"
 
 interface Cmd {
   id: string
@@ -17,13 +28,15 @@ export function CommandMenu({
   open,
   onClose,
   navigate,
+  onCreate,
 }: {
   open: boolean
   onClose: () => void
   navigate: (id: string) => void
+  onCreate: (kind: CreateKind) => void
 }) {
   const { theme, toggleTheme } = useTheme()
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState("")
   const [sel, setSel] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -31,16 +44,52 @@ export function CommandMenu({
 
   const commands = useMemo<Cmd[]>(() => {
     const actions: Cmd[] = [
-      { id: 'act-theme', label: `Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`, hint: 'Appearance', icon: theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />, run: toggleTheme },
-      { id: 'act-lead', label: 'Create lead', hint: 'Action', icon: <Plus size={15} />, run: () => navigate('leads') },
-      { id: 'act-task', label: 'Create task', hint: 'Action', icon: <CheckSquare size={15} />, run: () => navigate('tasks') },
-      { id: 'act-outreach', label: 'Draft outreach', hint: 'Action', icon: <Send size={15} />, run: () => navigate('outreach') },
-      { id: 'act-proposal', label: 'New proposal', hint: 'Action', icon: <FileText size={15} />, run: () => navigate('proposals') },
-      { id: 'act-agent', label: 'Run an agent', hint: 'Action', icon: <Bot size={15} />, run: () => navigate('agents') },
+      {
+        id: "act-theme",
+        label: `Switch to ${theme === "dark" ? "light" : "dark"} theme`,
+        hint: "Appearance",
+        icon: theme === "dark" ? <Sun size={15} /> : <Moon size={15} />,
+        run: toggleTheme,
+      },
+      {
+        id: "act-lead",
+        label: "Create lead",
+        hint: "Action",
+        icon: <Plus size={15} />,
+        run: () => onCreate("lead"),
+      },
+      {
+        id: "act-task",
+        label: "Create task",
+        hint: "Action",
+        icon: <CheckSquare size={15} />,
+        run: () => onCreate("task"),
+      },
+      {
+        id: "act-outreach",
+        label: "Draft outreach",
+        hint: "Action",
+        icon: <Send size={15} />,
+        run: () => navigate("outreach"),
+      },
+      {
+        id: "act-proposal",
+        label: "New proposal",
+        hint: "Action",
+        icon: <FileText size={15} />,
+        run: () => navigate("proposals"),
+      },
+      {
+        id: "act-agent",
+        label: "Run an agent",
+        hint: "Action",
+        icon: <Bot size={15} />,
+        run: () => navigate("agents"),
+      },
     ]
     const nav: Cmd[] = NAV.flatMap((s) =>
       s.items.map((i) => ({
-        id: 'nav-' + i.id,
+        id: "nav-" + i.id,
         label: i.label,
         hint: s.label,
         icon: <i.icon size={15} />,
@@ -48,17 +97,19 @@ export function CommandMenu({
       })),
     )
     return [...actions, ...nav]
-  }, [navigate, theme, toggleTheme])
+  }, [navigate, onCreate, theme, toggleTheme])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return commands
-    return commands.filter((c) => (c.label + ' ' + c.hint).toLowerCase().includes(q))
+    return commands.filter((c) =>
+      (c.label + " " + c.hint).toLowerCase().includes(q),
+    )
   }, [query, commands])
 
   useEffect(() => {
     if (open) {
-      setQuery('')
+      setQuery("")
       setSel(0)
       requestAnimationFrame(() => inputRef.current?.focus())
     }
@@ -76,7 +127,7 @@ export function CommandMenu({
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center pt-[12vh] px-4 animate-overlay"
-      style={{ background: 'var(--color-scrim)', backdropFilter: 'blur(2px)' }}
+      style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(2px)" }}
       onMouseDown={onClose}
     >
       <div
@@ -84,30 +135,38 @@ export function CommandMenu({
         role="dialog"
         aria-modal="true"
         aria-label="Command menu"
-        className="w-full max-w-[600px] rounded-[12px] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-stack overflow-hidden animate-menu"
+        className="w-full max-w-[600px] rounded-lg bg-[var(--popover)] border border-[var(--border)] shadow-stack overflow-hidden animate-menu"
         onMouseDown={(e) => e.stopPropagation()}
         onKeyDown={(e) => {
-          if (e.key === 'ArrowDown') { e.preventDefault(); setSel((s) => Math.min(s + 1, filtered.length - 1)) }
-          else if (e.key === 'ArrowUp') { e.preventDefault(); setSel((s) => Math.max(s - 1, 0)) }
-          else if (e.key === 'Enter') { e.preventDefault(); choose(filtered[sel]) }
-          else if (e.key === 'Escape') onClose()
+          if (e.key === "ArrowDown") {
+            e.preventDefault()
+            setSel((s) => Math.min(s + 1, filtered.length - 1))
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault()
+            setSel((s) => Math.max(s - 1, 0))
+          } else if (e.key === "Enter") {
+            e.preventDefault()
+            choose(filtered[sel])
+          } else if (e.key === "Escape") onClose()
         }}
       >
-        <div className="flex items-center gap-2.5 px-3.5 h-12 border-b border-[var(--color-hairline)]">
-          <Search size={16} className="text-[var(--color-text-tertiary)]" />
+        <div className="flex items-center gap-2.5 px-3.5 h-12 border-b border-[var(--border)]">
+          <Search size={16} className="text-[var(--muted-foreground)]" />
           <input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search or run a command…"
             aria-label="Search commands"
-            className="flex-1 bg-transparent outline-none text-base sm:text-[14px] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]"
+            className="flex-1 bg-transparent outline-none text-base sm:text-[14px] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]"
           />
           <Kbd>Esc</Kbd>
         </div>
         <div className="max-h-[52vh] overflow-auto scroll-quiet py-1.5">
           {filtered.length === 0 && (
-            <div className="px-4 py-8 text-center text-[13px] text-[var(--color-text-muted)]">No results</div>
+            <div className="px-4 py-8 text-center text-[13px] text-[var(--muted-foreground)]">
+              No results
+            </div>
           )}
           {filtered.map((c, i) => (
             <button
@@ -115,13 +174,22 @@ export function CommandMenu({
               onMouseEnter={() => setSel(i)}
               onClick={() => choose(c)}
               className={`w-full flex items-center gap-3 px-3.5 h-9 text-left transition-colors duration-100 ${
-                i === sel ? 'bg-[var(--color-surface-raised)]' : ''
+                i === sel ? "bg-[var(--secondary)]" : ""
               }`}
             >
-              <span className="text-[var(--color-text-tertiary)]">{c.icon}</span>
-              <span className="text-[13px] text-[var(--color-text-primary)] flex-1">{c.label}</span>
-              <span className="text-[11px] text-[var(--color-text-muted)]">{c.hint}</span>
-              {i === sel && <CornerDownLeft size={13} className="text-[var(--color-text-muted)]" />}
+              <span className="text-[var(--muted-foreground)]">{c.icon}</span>
+              <span className="text-[13px] text-[var(--foreground)] flex-1">
+                {c.label}
+              </span>
+              <span className="text-[11px] text-[var(--muted-foreground)]">
+                {c.hint}
+              </span>
+              {i === sel && (
+                <CornerDownLeft
+                  size={13}
+                  className="text-[var(--muted-foreground)]"
+                />
+              )}
             </button>
           ))}
         </div>

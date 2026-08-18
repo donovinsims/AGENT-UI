@@ -1,82 +1,146 @@
-import { type ReactNode, useState } from 'react'
-import { SlidersHorizontal, ListFilter, ChevronDown } from 'lucide-react'
-import { Button } from '../components/ui'
+import { type ReactNode } from "react"
+import { ChevronDown } from "lucide-react"
+import { useUrlState } from "../lib/url-state"
+import { Tabs } from "../components/form"
+import { Button, IconButton } from "../components/ui"
+import { FilterBar } from "../components/filter"
+import { DisplayOptions, type DisplaySettings } from "../components/display"
 
-// Page wrapper: sticky toolbar header + scrollable body.
+// Page wrapper: Circle-style toolbar header (h-10) + optional filter bar +
+// scrollable body. The active view is URL-synced (nuqs-style) per page.
+
+export interface PageDisplayProps {
+  settings: DisplaySettings
+  onChange: (next: DisplaySettings) => void
+  groupOptions: { id: string; label: string }[]
+  orderOptions: { id: string; label: string }[]
+  columnOptions?: { id: string; label: string }[]
+}
+
 export function Page({
   title,
   count,
   views,
   actions,
+  filter,
+  display,
+  panel,
   children,
   scroll = true,
+  /** right-side detail panel (absolute within the page) */
 }: {
   title: string
   count?: number
   views?: string[]
   actions?: ReactNode
+  filter?: {
+    filters: import("../components/filter").FilterChip[]
+    onChange: (filters: import("../components/filter").FilterChip[]) => void
+    columns: import("../components/filter").FilterColumn<any>[]
+    items: any[]
+  }
+  panel?: ReactNode
+  display?: PageDisplayProps
   children: ReactNode | ((view?: string) => ReactNode)
   scroll?: boolean
 }) {
-  const [view, setView] = useState(views?.[0])
+  const slug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+  const [view, setView] = useUrlState<string>(`view:${slug}`, views?.[0] ?? "")
+
   return (
-    <div className="h-full flex flex-col">
-      <div className="h-11 shrink-0 flex items-center gap-2 px-4 md:px-5 border-b border-[var(--color-hairline)]">
-        <button className="flex items-center gap-1.5 text-[14px] w-semibold">
+    <div className="relative flex h-full flex-col">
+      <div className="flex h-10 shrink-0 items-center gap-2 px-2.5 lg:px-3 border-b border-border bg-container">
+        <button className="flex items-center gap-1.5 text-[14px] w-semibold text-foreground">
           {title}
-          {count != null && <span className="text-[var(--color-text-muted)] w-medium tabular">{count}</span>}
-          <ChevronDown size={13} className="text-[var(--color-text-tertiary)]" />
+          {count != null && (
+            <span className="text-muted-foreground w-medium tabular">
+              {count}
+            </span>
+          )}
+          <ChevronDown size={13} className="text-muted-foreground" />
         </button>
-        {views && (
-          <div className="ml-2 flex items-center gap-0.5 rounded-[8px] bg-[var(--color-level-2)] p-0.5">
-            {views.map((v) => (
-              <button
-                key={v}
-                onClick={() => setView(v)}
-                data-view={v}
-                className={`h-6 px-2.5 rounded-[6px] text-[12px] w-medium transition-colors ${
-                  view === v ? 'bg-[var(--color-surface-raised)] text-[var(--color-text-primary)]' : 'text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]'
-                }`}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
+        {views && views.length > 0 && (
+          <Tabs
+            value={view || views[0]}
+            onChange={setView}
+            tabs={views.map((v) => ({ id: v, label: v }))}
+          />
         )}
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-0.5">
           {actions}
-          <button aria-label="Filter view" className="grid place-items-center h-7 w-7 rounded-[6px] text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)]"><ListFilter size={15} /></button>
-          <button aria-label="View settings" className="grid place-items-center h-7 w-7 rounded-[6px] text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-raised)]"><SlidersHorizontal size={15} /></button>
+          {display && (
+            <DisplayOptions
+              settings={display.settings}
+              onChange={display.onChange}
+              groupOptions={display.groupOptions}
+              orderOptions={display.orderOptions}
+              columnOptions={display.columnOptions ?? []}
+            />
+          )}
         </div>
       </div>
-      {/* provide selected view to children via data attr on wrapper */}
-      <div data-active-view={view} className={`flex-1 min-h-0 ${scroll ? 'overflow-y-auto scroll-quiet' : 'overflow-hidden'}`}>
-        {typeof children === 'function' ? (children as (v?: string) => ReactNode)(view) : children}
+      {filter && <FilterBar {...filter} />}
+      <div
+        data-active-view={view}
+        className={`flex-1 min-h-0 ${
+          scroll ? "overflow-y-auto scroll-quiet" : "overflow-hidden"
+        } bg-container`}
+      >
+        {typeof children === "function"
+          ? (children as (v?: string) => ReactNode)(view)
+          : children}
       </div>
+      {panel}
     </div>
   )
 }
 
-// Simpler filter chip button
-export function FilterButton() {
+// Ghost filter chip button (secondary screens, pre-filter-bar)
+export function FilterButton({
+  children = "Filter",
+}: {
+  children?: ReactNode
+}) {
   return (
-    <Button variant="ghost" size="sm" className="text-[var(--color-text-tertiary)]">
-      <ListFilter size={14} /> Filter
+    <Button variant="ghost" size="sm">
+      {children}
     </Button>
   )
 }
 
-// A dense list-row shell. Hover/cursor affordance only when the row is interactive.
-export function Row({ children, onClick, className = '' }: { children: ReactNode; onClick?: () => void; className?: string }) {
+// Dense list row (Circle: h-11). Hover/cursor affordance only when interactive.
+export function Row({
+  children,
+  onClick,
+  className = "",
+}: {
+  children: ReactNode
+  onClick?: () => void
+  className?: string
+}) {
   const interactive = Boolean(onClick)
   return (
     <div
       onClick={onClick}
-      role={interactive ? 'button' : undefined}
+      role={interactive ? "button" : undefined}
       tabIndex={interactive ? 0 : undefined}
-      onKeyDown={interactive ? (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onClick?.() } } : undefined}
-      className={`group flex items-center gap-3 h-[38px] px-4 md:px-5 border-b border-[var(--color-hairline)] ${
-        interactive ? 'hover:bg-[var(--color-level-2)] transition-colors duration-100 cursor-pointer' : ''
+      onKeyDown={
+        interactive
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault()
+                onClick?.()
+              }
+            }
+          : undefined
+      }
+      className={`group flex h-11 items-center gap-3 border-b border-border bg-container px-2.5 lg:px-3 ${
+        interactive
+          ? "cursor-pointer transition-colors hover:bg-secondary/60"
+          : ""
       } ${className}`}
     >
       {children}
@@ -84,13 +148,32 @@ export function Row({ children, onClick, className = '' }: { children: ReactNode
   )
 }
 
-export function GroupHeader({ color, label, count }: { color?: ReactNode; label: string; count: number }) {
+// Grouping header (Circle: h-10, sticky under the toolbar).
+export function GroupHeader({
+  color,
+  label,
+  count,
+  onAdd,
+}: {
+  color?: ReactNode
+  label: string
+  count: number
+  onAdd?: () => void
+}) {
   return (
-    <div className="flex items-center gap-2 h-9 px-4 md:px-5 bg-[var(--color-level-1)] border-b border-[var(--color-hairline)] sticky top-0 z-10">
+    <div className="group sticky top-0 z-10 flex h-10 items-center gap-2 border-b border-border bg-container px-2.5 lg:px-3">
       {color}
-      <span className="text-[13px] w-semibold">{label}</span>
-      <span className="text-[12px] text-[var(--color-text-muted)] tabular">{count}</span>
-      <button className="ml-auto grid place-items-center h-6 w-6 rounded-[5px] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-secondary)]">+</button>
+      <span className="text-[13px] w-semibold text-foreground">{label}</span>
+      <span className="tabular text-[12px] text-muted-foreground">{count}</span>
+      <button
+        onClick={onAdd}
+        aria-label={`Add to ${label}`}
+        className="ml-auto grid h-6 w-6 place-items-center rounded-[5px] text-muted-foreground opacity-0 transition-all hover:bg-secondary hover:text-foreground group-hover:opacity-100 focus:opacity-100"
+      >
+        +
+      </button>
     </div>
   )
 }
+
+export { IconButton }
