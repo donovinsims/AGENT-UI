@@ -1,5 +1,5 @@
 // Operator OS — in-memory seed data layer.
-// This is the single boundary a real backend (Supabase + /api/v1) later replaces.
+// This is the single boundary a real backend (Appwrite + /api/v1) later replaces.
 // Screens read from these typed collections; records are interlinked by id so the
 // lead → company → opportunity → client → project → task lifecycle stays connected.
 
